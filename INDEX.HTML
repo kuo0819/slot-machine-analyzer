@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>AI 趨勢戰略家 - 鋼鐵意志版</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .status-glow { transition: all 0.5s ease; }
+        .key-active:active { background-color: #333; transform: scale(0.95); }
+        input::-webkit-outer-spin-button, input::-webkit-inner-spin-button { -webkit-appearance: none; }
+        .data-card { background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.1); }
+        .progress-bar { height: 100%; transition: width 0.5s ease; }
+        .lock-overlay { animation: pulse 1.5s infinite; }
+        @keyframes pulse { 0% { background-color: rgba(88, 28, 135, 1); } 50% { background-color: rgba(126, 34, 206, 1); } 100% { background-color: rgba(88, 28, 135, 1); } }
+        .is-locked { pointer-events: none; opacity: 0.4; filter: grayscale(1); }
+        body { -webkit-tap-highlight-color: transparent; }
+    </style>
+</head>
+<body class="bg-[#050505] text-white min-h-screen flex flex-col items-center p-4 font-sans select-none pb-12">
+
+    <div class="max-w-md w-full space-y-4">
+        <div id="statusBar" class="bg-[#111] rounded-[2.5rem] overflow-hidden border border-gray-800 shadow-2xl">
+            <div id="statusBg" class="p-6 text-center bg-gray-900 status-glow border-b border-white/5">
+                <div class="flex justify-between items-center mb-1">
+                    <span id="spinCounter" class="text-[10px] font-mono text-gray-500 uppercase tracking-widest">週期: 0</span>
+                    <span id="multiplierTag" class="px-2 py-0.5 rounded text-[10px] font-black bg-white text-black uppercase">冷靜模式</span>
+                </div>
+                <h1 id="statusText" class="text-2xl font-black mb-1 tracking-tight">戰術監控中</h1>
+                <div class="flex justify-center items-center space-x-2">
+                    <p id="trendIndicator" class="text-[10px] font-bold tracking-widest text-blue-400">系統待命</p>
+                    <span class="text-gray-700">|</span>
+                    <p id="totalPlDisplay" class="text-[10px] font-bold tracking-widest text-gray-500">總損益: 0</p>
+                </div>
+                <div class="mt-4 px-4">
+                    <div class="flex justify-between text-[9px] text-gray-500 mb-1 font-bold">
+                        <span id="warningMsg">「紀律是贏家的唯一路徑」</span>
+                    </div>
+                    <div class="bg-white/5 h-1 rounded-full overflow-hidden">
+                        <div id="progressBar" class="progress-bar w-0 bg-blue-500"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="p-5 space-y-4">
+                <div class="grid grid-cols-3 gap-2">
+                    <div class="data-card p-2 rounded-xl text-center">
+                        <p class="text-[9px] text-gray-500 mb-1 font-bold">初始本金</p>
+                        <input type="number" id="initialCapital" value="1000" class="bg-transparent text-sm font-mono font-bold text-white outline-none w-full text-center border-b border-white/5">
+                    </div>
+                    <div class="data-card p-2 rounded-xl text-center">
+                        <p class="text-[9px] text-blue-400 mb-1 font-bold">目標獲利</p>
+                        <input type="number" id="targetGoal" value="2000" class="bg-transparent text-sm font-mono font-bold text-white outline-none w-full text-center border-b border-white/5">
+                    </div>
+                    <div class="data-card p-2 rounded-xl text-center">
+                        <p class="text-[9px] text-gray-500 mb-1 font-bold">基準單注</p>
+                        <input type="number" id="currentBet" value="1" class="bg-transparent text-sm font-mono font-bold text-white outline-none w-full text-center border-b border-white/5">
+                    </div>
+                </div>
+
+                <div id="inputArea" class="grid grid-cols-2 gap-3">
+                    <div onclick="setActiveInput('startBalance')" id="boxStart" class="data-card p-3 rounded-2xl border-2 border-blue-600 cursor-pointer text-center">
+                        <p class="text-[10px] text-gray-500 mb-1 font-bold uppercase">100轉前餘額</p>
+                        <input type="number" id="startBalance" class="w-full bg-transparent text-xl font-bold outline-none pointer-events-none text-center" placeholder="0" readonly>
+                    </div>
+                    <div onclick="setActiveInput('endBalance')" id="boxEnd" class="data-card p-3 rounded-2xl border-2 border-transparent cursor-pointer text-center">
+                        <p class="text-[10px] text-gray-500 mb-1 font-bold uppercase">100轉後餘額</p>
+                        <input type="number" id="endBalance" class="w-full bg-transparent text-xl font-bold outline-none pointer-events-none text-center" placeholder="0" readonly>
+                    </div>
+                </div>
+
+                <div class="bg-white/[0.02] p-4 rounded-3xl border border-white/10 flex justify-between items-center px-6">
+                    <div>
+                        <p class="text-[9px] text-gray-500 font-bold mb-1">RTP 表現</p>
+                        <p id="rtpDisplay" class="text-xl font-mono font-bold text-white">---%</p>
+                    </div>
+                    <div class="text-right">
+                        <p class="text-[9px] text-blue-500 font-bold mb-1 tracking-widest uppercase">下一階建議</p>
+                        <p id="targetBetDisplay" class="text-4xl font-black text-white">$ ---</p>
+                    </div>
+                </div>
+
+                <div id="keyboardArea" class="grid grid-cols-3 gap-2">
+                    <button onclick="pressKey('1')" class="py-4 bg-white/5 rounded-2xl font-bold text-xl key-active">1</button>
+                    <button onclick="pressKey('2')" class="py-4 bg-white/5 rounded-2xl font-bold text-xl key-active">2</button>
+                    <button onclick="pressKey('3')" class="py-4 bg-white/5 rounded-2xl font-bold text-xl key-active">3</button>
+                    <button onclick="pressKey('4')" class="py-4 bg-white/5 rounded-2xl font-bold text-xl key-active">4</button>
+                    <button onclick="pressKey('5')" class="py-4 bg-white/5 rounded-2xl font-bold text-xl key-active">5</button>
+                    <button onclick="pressKey('6')" class="py-4 bg-white/5 rounded-2xl font-bold text-xl key-active">6</button>
+                    <button onclick="pressKey('7')" class="py-4 bg-white/5 rounded-2xl font-bold text-xl key-active">7</button>
+                    <button onclick="pressKey('8')" class="py-4 bg-white/5 rounded-2xl font-bold text-xl key-active">8</button>
+                    <button onclick="pressKey('9')" class="py-4 bg-white/5 rounded-2xl font-bold text-xl key-active">9</button>
+                    <button onclick="pressKey('C')" class="py-4 bg-red-900/10 text-red-500 rounded-2xl font-bold text-lg key-active">清除</button>
+                    <button onclick="pressKey('0')" class="py-4 bg-white/5 rounded-2xl font-bold text-xl key-active">0</button>
+                    <button id="okBtn" onclick="calculate()" class="py-4 bg-blue-600 rounded-2xl font-bold text-lg key-active uppercase">確認</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-[#111] border border-white/10 rounded-[2rem] overflow-hidden">
+            <div class="p-4 bg-white/5 border-b border-white/5 flex justify-between items-center">
+                <h3 class="text-xs font-black tracking-widest text-gray-400">📋 執行紀錄</h3>
+                <button id="resetBtn" onclick="clearHistory()" class="text-[10px] bg-red-900/30 text-red-400 px-3 py-1 rounded border border-red-500/20 font-bold uppercase transition-all">重置數據</button>
+            </div>
+            <div id="historyList" class="max-h-40 overflow-y-auto text-[11px]">
+                <p id="emptyHistory" class="p-8 text-center text-gray-600 italic">等待數據中...</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentInputId = 'startBalance';
+        let cycleCount = 0;
+        let lastRTP = null;
+        let isLocked = false;
+
+        // 頁面載入時檢查是否還在鎖定時間內
+        window.onload = () => {
+            const lockTime = localStorage.getItem('lockUntil');
+            if (lockTime && Date.now() < lockTime) {
+                const remaining = Math.ceil((lockTime - Date.now()) / 1000);
+                startLockdown(remaining);
+            }
+        };
+
+        function setActiveInput(id) {
+            if (isLocked) return;
+            currentInputId = id;
+            document.getElementById('boxStart').style.borderColor = id === 'startBalance' ? '#2563eb' : 'transparent';
+            document.getElementById('boxEnd').style.borderColor = id === 'endBalance' ? '#2563eb' : 'transparent';
+        }
+
+        function pressKey(key) {
+            if (isLocked) return;
+            const input = document.getElementById(currentInputId);
+            if (key === 'C') input.value = '';
+            else input.value += key;
+        }
+
+        function calculate() {
+            if (isLocked) return;
+            const capital = parseFloat(document.getElementById('initialCapital').value);
+            const goal = parseFloat(document.getElementById('targetGoal').value);
+            const start = parseFloat(document.getElementById('startBalance').value);
+            const end = parseFloat(document.getElementById('endBalance').value);
+            const bet = parseFloat(document.getElementById('currentBet').value);
+
+            if (isNaN(start) || isNaN(end) || isNaN(bet) || isNaN(capital) || isNaN(goal)) return;
+
+            const profit = end - start;
+            const rtp = ((profit + (bet * 100)) / (bet * 100)) * 100;
+            const totalPl = end - capital;
+            cycleCount++;
+
+            // 進度與趨勢邏輯
+            const stopLossLine = capital * 0.5;
+            let percent = ((end - stopLossLine) / (goal - stopLossLine)) * 100;
+            percent = Math.min(Math.max(percent, 0), 100);
+            
+            document.getElementById('progressBar').style.width = percent + "%";
+            document.getElementById('progressBar').style.backgroundColor = totalPl >= 0 ? "#4ade80" : "#ef4444";
+            document.getElementById('totalPlDisplay').innerText = `總損益: ${totalPl.toFixed(0)}`;
+            document.getElementById('rtpDisplay').innerText = rtp.toFixed(1) + "%";
+            document.getElementById('spinCounter').innerText = `週期: ${cycleCount}`;
+
+            let trend = "⚖️ 平穩";
+            if (lastRTP !== null) {
+                if (rtp > lastRTP + 5) trend = "⤴️ 升溫";
+                else if (rtp < lastRTP - 5) trend = "⤵️ 降溫";
+            }
+
+            const m = applyFinalTactics(rtp, bet, trend, capital, goal, end);
+            const targetBet = (Math.round(bet * m * 10) / 10).toFixed(1);
+            document.getElementById('targetBetDisplay').innerText = "$ " + targetBet;
+
+            addHistoryRow(cycleCount, rtp.toFixed(1), profit, trend, targetBet);
+
+            lastRTP = rtp;
+            document.getElementById('startBalance').value = end;
+            document.getElementById('endBalance').value = '';
+            setActiveInput('endBalance');
+        }
+
+        function applyFinalTactics(rtp, bet, trend, capital, goal, end) {
+            const bg = document.getElementById('statusBg');
+            const statusTxt = document.getElementById('statusText');
+            
+            if (end <= capital * 0.5) {
+                startLockdown(60); // 觸發鎖定
+                localStorage.setItem('lockUntil', Date.now() + 60000); // 記憶鎖定時間
+                statusTxt.innerText = "🛑 偵測情緒失控：冷靜 60 秒";
+                bg.classList.add('lock-overlay');
+                return 0.2;
+            }
+
+            if (end >= goal) {
+                statusTxt.innerText = "🏆 達標：鎖定獲利離場";
+                return 1.0;
+            }
+
+            // 根據 RTP 判斷狀態
+            if (rtp < 80) statusTxt.innerText = "🚨 嚴重收分：務必縮注";
+            else if (rtp < 110) statusTxt.innerText = "⚖️ 洗盤階段：耐心等待";
+            else statusTxt.innerText = "🔥 機台升溫：準備追擊";
+
+            return rtp < 80 ? 0.3 : (rtp > 130 ? 1.5 : 1.0);
+        }
+
+        function startLockdown(seconds) {
+            isLocked = true;
+            const okBtn = document.getElementById('okBtn');
+            const resetBtn = document.getElementById('resetBtn');
+            const inputArea = document.getElementById('inputArea');
+            const keyboardArea = document.getElementById('keyboardArea');
+
+            // 禁用 UI
+            resetBtn.disabled = true;
+            resetBtn.classList.add('is-locked');
+            inputArea.classList.add('is-locked');
+            keyboardArea.classList.add('is-locked');
+            
+            let timeLeft = seconds;
+            const timer = setInterval(() => {
+                okBtn.innerText = `冷靜中 (${timeLeft}s)`;
+                timeLeft--;
+                if (timeLeft < 0) {
+                    clearInterval(timer);
+                    isLocked = false;
+                    localStorage.removeItem('lockUntil');
+                    okBtn.innerText = "確認";
+                    resetBtn.disabled = false;
+                    resetBtn.classList.remove('is-locked');
+                    inputArea.classList.remove('is-locked');
+                    keyboardArea.classList.remove('is-locked');
+                    document.getElementById('statusBg').classList.remove('lock-overlay');
+                }
+            }, 1000);
+        }
+
+        function addHistoryRow(cycle, rtp, profit, trend, target) {
+            const list = document.getElementById('historyList');
+            const empty = document.getElementById('emptyHistory');
+            if (empty) empty.remove();
+            const row = document.createElement('div');
+            row.className = 'history-row p-3 flex justify-between items-center';
+            row.innerHTML = `<div><span class="text-gray-500 text-[9px]">C${cycle}</span><br><b>${rtp}%</b></div><div class="${profit >= 0 ? 'text-green-400' : 'text-red-400'} font-mono">${profit.toFixed(0)}</div><div class="text-right text-blue-400 font-bold">$${target}</div>`;
+            list.prepend(row);
+        }
+
+        function clearHistory() {
+            if (isLocked) return;
+            if (confirm("要重置數據嗎？這會清除所有進度。")) location.reload();
+        }
+    </script>
+</body>
+</html>
