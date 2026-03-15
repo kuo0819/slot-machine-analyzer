@@ -3,24 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>鋼鐵執行者 - 完整數值恢復</title>
+    <title>鋼鐵執行者 - 智能分頁版</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         * { touch-action: manipulation; -webkit-tap-highlight-color: transparent; -webkit-user-select: none; }
         body { 
-            background-color: #050505; 
-            color: white; 
-            overflow: hidden; 
-            height: 100vh; 
-            display: flex; 
-            flex-direction: column;
+            background-color: #050505; color: white; overflow: hidden; height: 100vh; display: flex; flex-direction: column;
             padding-top: env(safe-area-inset-top);
         }
         .data-card { background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.1); }
         .active-box { border-color: #3b82f6 !important; background: rgba(59, 130, 246, 0.15); box-shadow: 0 0 8px rgba(59, 130, 246, 0.2); }
         input { pointer-events: none; }
         .tab-active { color: #3b82f6; border-bottom: 2px solid #3b82f6; font-weight: 900; }
-        .hidden-page { display: none; }
+        .hidden-page { display: none !important; }
         .history-row { padding: 12px; margin-bottom: 8px; border-radius: 12px; background: rgba(255, 255, 255, 0.05); border-left-width: 6px; }
         .history-val { font-size: 20px; font-weight: 900; }
     </style>
@@ -36,7 +31,7 @@
                     <span id="voltText" class="text-[7px] font-bold text-gray-500 uppercase">VOLT</span>
                 </div>
                 <h1 id="mainAction" class="text-xl font-black text-white">等待數據</h1>
-                <div id="subText" class="text-[10px] text-blue-400 font-bold uppercase">Ready</div>
+                <div id="subText" class="text-[10px] text-blue-400 font-bold uppercase tracking-widest">System Ready</div>
             </div>
 
             <div class="flex justify-around border-b border-white/5 bg-black/20 text-[11px] text-gray-500">
@@ -85,19 +80,23 @@
         </div>
 
         <div class="flex-grow flex flex-col min-h-0 bg-[#111] rounded-[1.5rem] border border-white/5 mb-[env(safe-area-inset-bottom)]">
-            <div class="p-3 border-b border-white/10 flex justify-between items-center flex-shrink-0 bg-white/5">
+            
+            <div id="battleStatsBar" class="p-3 border-b border-white/10 flex justify-between items-center flex-shrink-0 bg-white/5 hidden-page">
                 <div class="flex flex-col">
-                    <span class="text-[8px] text-gray-500 font-black uppercase tracking-tighter">Total Spins</span>
+                    <span class="text-[8px] text-gray-500 font-black uppercase">Total Spins</span>
                     <span id="totalSpinsDisplay" class="text-lg font-black text-blue-400 leading-tight">0</span>
                 </div>
-                <div class="text-center">
-                    <span class="text-[9px] font-black text-gray-400 uppercase tracking-widest">實戰數據歷史</span>
-                </div>
+                <div class="text-center"><span class="text-[9px] font-black text-gray-400 uppercase tracking-widest">實戰即時戰報</span></div>
                 <div class="flex flex-col items-end">
-                    <span class="text-[8px] text-gray-500 font-black uppercase tracking-tighter">Global RTP</span>
+                    <span class="text-[8px] text-gray-500 font-black uppercase">Global RTP</span>
                     <span id="totalRtpDisplay" class="text-lg font-black text-green-400 leading-tight">0%</span>
                 </div>
             </div>
+
+            <div id="roomStatsBar" class="p-2 border-b border-white/5 text-center flex-shrink-0">
+                <span class="text-[10px] font-black text-gray-500 uppercase tracking-widest">房間大數據紀錄</span>
+            </div>
+
             <div id="historyList" class="flex-grow overflow-y-auto p-3">
                 </div>
         </div>
@@ -124,6 +123,11 @@
             document.getElementById('pageLive').classList.toggle('hidden-page', page !== 'live');
             document.getElementById('tabRoom').classList.toggle('tab-active', page === 'room');
             document.getElementById('tabLive').classList.toggle('tab-active', page === 'live');
+            
+            // 關鍵邏輯：切換顯示戰情列
+            document.getElementById('battleStatsBar').classList.toggle('hidden-page', page !== 'live');
+            document.getElementById('roomStatsBar').classList.toggle('hidden-page', page !== 'room');
+
             setActiveInput(page === 'room' ? 'dayRtp' : 'sBal');
         }
 
@@ -154,8 +158,6 @@
         }
 
         function runLiveStrategy() {
-            const init = parseFloat(document.getElementById('initCap').value);
-            const targetX = parseFloat(document.getElementById('targetX').value);
             const bet = parseFloat(document.getElementById('baseBet').value);
             const s = parseFloat(document.getElementById('sBal').value);
             const e = parseFloat(document.getElementById('eBal').value);
