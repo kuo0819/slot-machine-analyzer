@@ -3,20 +3,27 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>鋼鐵執行者 - 天城數據整合版</title>
+    <title>鋼鐵執行者 - 終極戰役版</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         * { touch-action: manipulation; -webkit-tap-highlight-color: transparent; -webkit-user-select: none; }
         body { 
             background-color: #050505; color: white; overflow: hidden; height: 100vh; display: flex; flex-direction: column;
-            padding-top: env(safe-area-inset-top); transition: background-color 0.5s ease;
+            padding-top: env(safe-area-inset-top); transition: all 0.5s ease;
         }
         .data-card { background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); }
         .active-box { border-color: #3b82f6 !important; background: rgba(59, 130, 246, 0.2); box-shadow: 0 0 15px rgba(59, 130, 246, 0.4); }
         input { pointer-events: none; }
         .tab-active { color: #3b82f6; border-bottom: 3px solid #3b82f6; font-weight: 900; }
         .hidden-page { display: none !important; }
-        .history-row { padding: 14px; margin-bottom: 10px; border-radius: 12px; background: rgba(255, 255, 255, 0.07); border-left-width: 6px; }
+        .history-row { padding: 12px; margin-bottom: 8px; border-radius: 12px; background: rgba(255, 255, 255, 0.07); border-left-width: 4px; }
+        
+        /* 氛圍燈效果 */
+        .mode-high { border-top: 4px solid #f87171; } /* 高波動 - 烈焰紅 */
+        .mode-med { border-top: 4px solid #3b82f6; }  /* 中波動 - 科技藍 */
+        
+        .win-glow { background-color: #064e3b !important; }
+        .loss-glow { background-color: #450a0a !important; }
     </style>
 </head>
 <body class="px-2 pb-2">
@@ -25,13 +32,19 @@
         
         <div class="bg-[#111] rounded-[1.5rem] border border-gray-800 overflow-hidden flex-shrink-0 mt-2">
             <div id="statusHeader" class="p-3 text-center border-b border-white/5 relative">
-                <h1 id="mainAction" class="text-xl font-black text-white italic">DATA ANALYZER</h1>
-                <div id="subText" class="text-[10px] text-blue-400 font-bold tracking-widest uppercase">Awaiting Input</div>
+                <div class="absolute left-4 top-4">
+                    <select id="volMode" class="bg-gray-800 text-[10px] font-bold p-1 rounded border border-gray-600 outline-none">
+                        <option value="high">高波動 (賽特型)</option>
+                        <option value="med">中波動 (穩定型)</option>
+                    </select>
+                </div>
+                <h1 id="mainAction" class="text-xl font-black text-white italic">STEEL EXECUTOR</h1>
+                <div id="subText" class="text-[10px] text-blue-400 font-bold tracking-widest uppercase">Awaiting Battle Data</div>
             </div>
 
             <div class="flex justify-around border-b border-white/5 bg-black/40 text-[11px] text-gray-400">
-                <button onclick="switchPage('room')" id="tabRoom" class="flex-1 py-3 tab-active">天城選台診斷</button>
-                <button onclick="switchPage('live')" id="tabLive" class="flex-1 py-3">即時策略測速</button>
+                <button onclick="switchPage('room')" id="tabRoom" class="flex-1 py-3 tab-active">大數據選台</button>
+                <button onclick="switchPage('live')" id="tabLive" class="flex-1 py-3">實戰測速控注</button>
             </div>
 
             <div id="pageRoom" class="p-3 space-y-2">
@@ -41,36 +54,36 @@
                         <input type="number" id="dayBet" placeholder="0" class="bg-transparent text-lg font-black text-white w-full text-center outline-none">
                     </div>
                     <div onclick="setActiveInput('dayRtp')" id="boxDayRtp" class="data-card p-2 rounded-lg text-center">
-                        <p class="text-[9px] text-gray-500 font-bold uppercase">今日 RTP %</p>
+                        <p class="text-[9px] text-gray-500 font-bold uppercase">今日得分率 %</p>
                         <input type="number" id="dayRtp" placeholder="0" class="bg-transparent text-lg font-black text-white w-full text-center outline-none">
                     </div>
                     <div onclick="setActiveInput('monthBet')" id="boxMonthBet" class="data-card p-2 rounded-lg text-center">
                         <p class="text-[9px] text-gray-400 font-bold uppercase">30日總下注</p>
                         <input type="number" id="monthBet" placeholder="0" class="bg-transparent text-sm font-bold text-gray-400 w-full text-center outline-none">
                     </div>
-                    <div onclick="setActiveInput('monthRtp')" id="boxMonthRtp" class="data-card p-2 rounded-lg text-center">
-                        <p class="text-[9px] text-gray-400 font-bold uppercase">30日 RTP %</p>
-                        <input type="number" id="monthRtp" placeholder="96.8" class="bg-transparent text-sm font-bold text-gray-400 w-full text-center outline-none">
+                    <div onclick="setActiveInput('targetRtp')" id="boxTargetRtp" class="data-card p-2 rounded-lg text-center">
+                        <p class="text-[9px] text-gray-400 font-bold uppercase">機台設定 RTP %</p>
+                        <input type="number" id="targetRtp" value="96.8" class="bg-transparent text-sm font-bold text-gray-400 w-full text-center outline-none">
                     </div>
                 </div>
-                <button onclick="runSkyCityAnalysis()" class="w-full py-3 bg-indigo-600 rounded-xl font-black text-sm active:bg-indigo-700">執行天城大數據分析</button>
+                <button onclick="runSkyCityAnalysis()" class="w-full py-3 bg-indigo-600 rounded-xl font-black text-sm active:bg-indigo-700 shadow-lg">計算機台盈虧狀態</button>
             </div>
 
             <div id="pageLive" class="p-3 space-y-2 hidden-page">
                 <div class="grid grid-cols-4 gap-1 text-[8px] font-bold">
                     <div onclick="setActiveInput('initCap')" id="boxInitCap" class="data-card p-1.5 rounded-lg text-center"><p class="text-gray-500">本金</p><input type="number" id="initCap" value="1000" class="bg-transparent text-white w-full text-center outline-none"></div>
-                    <div onclick="setActiveInput('targetX')" id="boxTargetX" class="data-card p-1.5 rounded-lg text-center"><p class="text-green-400">止盈</p><input type="number" id="targetX" value="2" class="bg-transparent text-green-400 w-full text-center outline-none"></div>
-                    <div onclick="setActiveInput('baseBet')" id="boxBaseBet" class="data-card p-1.5 rounded-lg text-center"><p class="text-gray-500">基準</p><input type="number" id="baseBet" value="10" class="bg-transparent text-white w-full text-center outline-none"></div>
-                    <div onclick="setActiveInput('spinT')" id="boxSpinT" class="data-card p-1.5 rounded-lg text-center"><p class="text-blue-400">轉數</p><input type="number" id="spinT" value="50" class="bg-transparent text-blue-400 w-full text-center outline-none"></div>
+                    <div onclick="setActiveInput('targetX')" id="boxTargetX" class="data-card p-1.5 rounded-lg text-center"><p class="text-green-400">止盈X</p><input type="number" id="targetX" value="2" class="bg-transparent text-green-400 w-full text-center outline-none"></div>
+                    <div onclick="setActiveInput('baseBet')" id="boxBaseBet" class="data-card p-1.5 rounded-lg text-center"><p class="text-gray-500">基準注</p><input type="number" id="baseBet" value="10" class="bg-transparent text-white w-full text-center outline-none"></div>
+                    <div onclick="setActiveInput('spinT')" id="boxSpinT" class="data-card p-1.5 rounded-lg text-center"><p class="text-blue-400">測速轉數</p><input type="number" id="spinT" value="50" class="bg-transparent text-blue-400 w-full text-center outline-none"></div>
                 </div>
                 <div class="grid grid-cols-2 gap-2 mt-1">
-                    <div onclick="setActiveInput('sBal')" id="boxSBal" class="data-card p-2.5 rounded-xl border border-blue-600 text-center"><p class="text-[9px] text-gray-500 font-bold uppercase">前餘額</p><input type="number" id="sBal" class="w-full bg-transparent text-xl font-black text-center outline-none"></div>
-                    <div onclick="setActiveInput('eBal')" id="boxEBal" class="data-card p-2.5 rounded-xl border border-transparent text-center"><p class="text-[9px] text-gray-500 font-bold uppercase">後餘額</p><input type="number" id="eBal" class="w-full bg-transparent text-xl font-black text-center outline-none"></div>
+                    <div onclick="setActiveInput('sBal')" id="boxSBal" class="data-card p-3 rounded-xl border border-blue-600 text-center"><p class="text-[9px] text-gray-500 font-bold">前餘額</p><input type="number" id="sBal" class="w-full bg-transparent text-xl font-black text-center outline-none" placeholder="0"></div>
+                    <div onclick="setActiveInput('eBal')" id="boxEBal" class="data-card p-3 rounded-xl border border-transparent text-center"><p class="text-[9px] text-gray-500 font-bold">後餘額</p><input type="number" id="eBal" class="w-full bg-transparent text-xl font-black text-center outline-none" placeholder="0"></div>
                 </div>
-                <button onclick="runLiveStrategy()" class="w-full py-3 bg-blue-600 rounded-xl font-black text-sm active:bg-blue-700">執行策略測速</button>
+                <button onclick="runLiveStrategy()" class="w-full py-3 bg-blue-600 rounded-xl font-black text-sm active:bg-blue-700">執行波動率策略計算</button>
             </div>
 
-            <div class="p-3 pt-0 grid grid-cols-6 gap-1 flex-shrink-0">
+            <div class="p-3 pt-0 grid grid-cols-6 gap-1 flex-shrink-0 text-sm">
                 <button onclick="pressKey('1')" class="py-3 bg-white/10 rounded-lg font-bold">1</button>
                 <button onclick="pressKey('2')" class="py-3 bg-white/10 rounded-lg font-bold">2</button>
                 <button onclick="pressKey('3')" class="py-3 bg-white/10 rounded-lg font-bold">3</button>
@@ -82,23 +95,23 @@
                 <button onclick="pressKey('9')" class="py-3 bg-white/10 rounded-lg font-bold">9</button>
                 <button onclick="pressKey('C')" class="py-3 bg-red-900/40 text-red-500 rounded-lg font-bold">C</button>
                 <button onclick="pressKey('0')" class="py-3 bg-white/10 rounded-lg font-bold">0</button>
-                <button onclick="resetAll()" class="py-3 bg-gray-800 rounded-lg font-bold text-[8px] text-gray-400">重置</button>
+                <button onclick="resetAll()" class="py-3 bg-gray-800 rounded-lg font-bold text-[8px] text-gray-400">RESET</button>
             </div>
         </div>
 
-        <div class="flex-grow flex flex-col min-h-0 bg-[#111] rounded-[1.5rem] border border-white/5 mb-[env(safe-area-inset-bottom)]">
-            <div id="battleStatsBar" class="p-4 border-b border-white/10 flex justify-between items-center flex-shrink-0 bg-white/5 hidden-page">
-                <div class="flex flex-col"><span class="text-[8px] text-gray-500 font-black uppercase">TOTAL SPINS</span><span id="totalSpinsDisplay" class="text-xl font-black text-blue-400 leading-none">0</span></div>
-                <div class="flex flex-col items-end"><span id="moodTag" class="text-[8px] text-blue-500 font-black uppercase mb-1">Status: Standby</span><span id="totalRtpDisplay" class="text-xl font-black text-green-400 leading-none">0.0%</span></div>
+        <div id="logSection" class="flex-grow flex flex-col min-h-0 bg-[#111] rounded-[1.5rem] border border-white/5 mb-4">
+            <div id="battleStatsBar" class="p-4 border-b border-white/10 flex justify-between items-center hidden-page">
+                <div><p class="text-[8px] text-gray-500 font-bold">已執行轉數</p><span id="totalSpinsDisplay" class="text-xl font-black text-blue-400">0</span></div>
+                <div class="text-right"><p id="moodTag" class="text-[8px] text-blue-500 font-bold mb-1 tracking-tighter">等待數據輸入</p><span id="totalRtpDisplay" class="text-xl font-black text-green-400">0.0%</span></div>
             </div>
-            <div id="roomStatsBar" class="p-2 border-b border-white/5 text-center flex-shrink-0"><span class="text-[10px] font-black text-gray-500 uppercase tracking-widest">SkyCity Big Data Logs</span></div>
-            <div id="historyList" class="flex-grow overflow-y-auto p-4"></div>
+            <div id="roomStatsBar" class="p-2 border-b border-white/5 text-center"><span class="text-[10px] font-black text-gray-500 uppercase tracking-widest">大數據盈虧日誌</span></div>
+            <div id="historyList" class="flex-grow overflow-y-auto p-4 font-medium"></div>
         </div>
     </div>
 
     <script>
         let currentInputId = 'dayBet', isFirstKey = true, cycle = 0;
-        let totalSpins = 0, totalBetAmount = 0, totalReturnAmount = 0;
+        let totalSpins = 0, totalBet = 0, totalReturn = 0;
 
         function switchPage(page) {
             document.getElementById('pageRoom').classList.toggle('hidden-page', page !== 'room');
@@ -112,7 +125,7 @@
 
         function setActiveInput(id) {
             currentInputId = id; isFirstKey = true;
-            document.querySelectorAll('.data-card').forEach(box => box.classList.remove('active-box'));
+            document.querySelectorAll('.data-card, [id^="box"]').forEach(box => box.classList.remove('active-box'));
             const boxId = 'box' + id.charAt(0).toUpperCase() + id.slice(1);
             if(document.getElementById(boxId)) document.getElementById(boxId).classList.add('active-box');
         }
@@ -124,53 +137,65 @@
             else { if (isFirstKey) { input.value = key; isFirstKey = false; } else { input.value += key; } }
         }
 
-        // --- 核心更新：天城數據分析邏輯 ---
+        // --- 核心更新：天城選台邏輯 (盈虧計算) ---
         function runSkyCityAnalysis() {
-            const dBet = parseFloat(document.getElementById('dayBet').value) || 0;
-            const dRtp = parseFloat(document.getElementById('dayRtp').value) || 0;
-            const mBet = parseFloat(document.getElementById('monthBet').value) || 1;
-            
-            // 1. 計算機台當日盈虧 (House Profit)
-            const houseProfit = dBet * (1 - (dRtp / 100));
-            
-            // 2. 計算樣本平衡度 (樣本數越接近 100% 越具參考價值)
-            const sampleBalance = (dBet / (mBet / 30)) * 100;
+            const dbet = parseFloat(document.getElementById('dayBet').value) || 0;
+            const drtp = parseFloat(document.getElementById('dayRtp').value) || 0;
+            const mbet = parseFloat(document.getElementById('monthBet').value) || 1;
+            const trtp = parseFloat(document.getElementById('targetRtp').value) || 96;
+
+            const houseMoney = dbet * (1 - (drtp/100)); // 機台今日盈虧
+            const sampleQuality = (dbet / (mbet / 30)) * 100; // 數據參考價值
             
             let advice = "", col = "#3b82f6";
-            
-            if (sampleBalance < 20) {
-                advice = "樣本數不足，數據暫不參考"; col = "#94a3b8";
-            } else if (houseProfit > 0) {
-                advice = `機台今日已吃 $${Math.floor(houseProfit)} (咬分中)`; col = "#ef4444";
+            if (sampleQuality < 30) {
+                advice = "樣本人數不足，數據暫不採信"; col = "#94a3b8";
+            } else if (houseMoney > 0) {
+                advice = `機台今日吃錢 $${Math.floor(houseMoney)} (咬分期)`; col = "#ef4444";
             } else {
-                advice = `機台今日已吐 $${Math.floor(Math.abs(houseProfit))} (吐分中)`; col = "#22c55e";
+                advice = `機台今日吐錢 $${Math.floor(Math.abs(houseMoney))} (吐分期)`; col = "#22c55e";
             }
-
-            updateStatus("天城診斷", advice, col);
-            addHistory("大數據分析", `平衡度: ${sampleBalance.toFixed(1)}%`, advice, col);
+            
+            updateStatus("選台診斷", advice, col);
+            addHistory("選台分析", `數據平衡度: ${sampleQuality.toFixed(1)}%`, advice, col);
         }
 
+        // --- 核心更新：狂轉教授邏輯 (波動率控注) ---
         function runLiveStrategy() {
+            const mode = document.getElementById('volMode').value;
             const bet = parseFloat(document.getElementById('baseBet').value);
             const s = parseFloat(document.getElementById('sBal').value);
             const e = parseFloat(document.getElementById('eBal').value);
             const t = parseFloat(document.getElementById('spinT').value);
+            const targetRtp = parseFloat(document.getElementById('targetRtp').value) || 96.8;
+            
             if (isNaN(e) || isNaN(s)) return;
 
             const roundBet = bet * t;
-            const roundReturn = e - s + roundBet;
-            const rtp = (roundReturn / roundBet) * 100;
+            const roundRet = e - s + roundBet;
+            const rtp = (roundRet / roundBet) * 100;
 
-            totalSpins += t; totalBetAmount += roundBet; totalReturnAmount += roundReturn;
+            totalSpins += t; totalBet += roundBet; totalReturn += roundRet;
             
-            let m = 1.0, res = "平打策略", col = "#3b82f6";
-            if (rtp >= 160) { m = 3.0; res = "倍數 3X 追擊"; col = "#a855f7"; }
-            else if (rtp < 80) { m = 0.2; res = "避險 0.2X 防禦"; col = "#ef4444"; }
+            let m = 1.0, res = "維持步調", col = "#3b82f6";
+            
+            if (mode === 'high') { // 高波動模式：更敢贏，更怕輸
+                if (rtp >= 130) { m = 4.0; res = "狂轉追擊 4.0X"; col = "#f87171"; }
+                else if (rtp < targetRtp * 0.8) { m = 0.1; res = "防禦避險 0.1X"; col = "#991b1b"; }
+            } else { // 中波動模式：穩定套利
+                if (rtp >= 150) { m = 2.5; res = "加碼進攻 2.5X"; col = "#a855f7"; }
+                else if (rtp < targetRtp * 0.9) { m = 0.5; res = "減注觀察 0.5X"; col = "#ef4444"; }
+            }
 
-            updateStatus("建議注碼", `$ ${(bet * m).toFixed(1)}`, col);
-            addHistory(`實戰測速 #${++cycle}`, `單次RTP: ${rtp.toFixed(1)}%`, res, col);
+            // 心理熔斷背景色控制
+            const init = parseFloat(document.getElementById('initCap').value);
+            if (e >= init * parseFloat(document.getElementById('targetX').value)) document.body.className = "px-2 pb-2 win-glow";
+            else if (e <= init * 0.5) document.body.className = "px-2 pb-2 loss-glow";
+            else document.body.className = "px-2 pb-2";
+
+            updateStatus("下一手建議", `$ ${(bet * m).toFixed(1)}`, col);
+            addHistory(`測速 #${++cycle}`, `得分率: ${rtp.toFixed(1)}% | 模式: ${mode === 'high' ? '高波動' : '中平穩'}`, res, col);
             
-            // 自動餘額同步
             document.getElementById('sBal').value = e;
             document.getElementById('eBal').value = '';
             setActiveInput('eBal');
@@ -179,8 +204,9 @@
 
         function updateBattleDisplay() {
             document.getElementById('totalSpinsDisplay').innerText = totalSpins;
-            const gRtp = (totalReturnAmount / totalBetAmount) * 100;
+            const gRtp = (totalReturn / totalBet) * 100;
             document.getElementById('totalRtpDisplay').innerText = gRtp.toFixed(1) + "%";
+            document.getElementById('moodTag').innerText = gRtp > 100 ? "目前優勢領先" : "目前抗壓中";
         }
 
         function updateStatus(main, sub, col) {
@@ -193,11 +219,11 @@
             const list = document.getElementById('historyList');
             const row = document.createElement('div');
             row.className = 'history-row'; row.style.borderColor = col;
-            row.innerHTML = `<div class="flex justify-between items-end"><div><div class="text-[9px] text-gray-500 font-bold uppercase mb-1">${type}</div><div class="text-lg font-black" style="color:${col}">${res}</div><div class="text-[12px] text-gray-400 font-medium mt-1">${data}</div></div></div>`;
+            row.innerHTML = `<div><div class="text-[8px] text-gray-500 font-bold uppercase">${type}</div><div class="text-lg font-black" style="color:${col}">${res}</div><div class="text-[11px] text-gray-400 mt-1">${data}</div></div>`;
             list.prepend(row);
         }
 
-        function resetAll() { if(confirm("確定重置？")) location.reload(); }
+        function resetAll() { if(confirm("確定清空所有數據？")) location.reload(); }
     </script>
 </body>
 </html>
