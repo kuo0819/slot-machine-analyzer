@@ -3,12 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>鋼鐵執行者 - 避開瀏海版</title>
+    <title>鋼鐵執行者 - 完整數值恢復</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         * { touch-action: manipulation; -webkit-tap-highlight-color: transparent; -webkit-user-select: none; }
-        
-        /* 核心修正：自動避開手機頂部時間與瀏海區域 */
         body { 
             background-color: #050505; 
             color: white; 
@@ -16,17 +14,13 @@
             height: 100vh; 
             display: flex; 
             flex-direction: column;
-            padding-top: env(safe-area-inset-top); /* iPhone 瀏海關鍵字 */
+            padding-top: env(safe-area-inset-top);
         }
-
         .data-card { background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.1); }
         .active-box { border-color: #3b82f6 !important; background: rgba(59, 130, 246, 0.15); box-shadow: 0 0 8px rgba(59, 130, 246, 0.2); }
         input { pointer-events: none; }
         .tab-active { color: #3b82f6; border-bottom: 2px solid #3b82f6; font-weight: 900; }
         .hidden-page { display: none; }
-        .win-mode { background-color: #064e3b !important; }
-        .tilt-mode { background-color: #450a0a !important; }
-        
         .history-row { padding: 12px; margin-bottom: 8px; border-radius: 12px; background: rgba(255, 255, 255, 0.05); border-left-width: 6px; }
         .history-val { font-size: 20px; font-weight: 900; }
     </style>
@@ -52,24 +46,24 @@
 
             <div id="pageRoom" class="p-3 space-y-2">
                 <div class="grid grid-cols-4 gap-1">
-                    <div onclick="setActiveInput('dayRtp')" id="boxDayRtp" class="data-card p-1.5 rounded-lg text-center"><p class="text-[8px] text-gray-500 font-bold">當日RTP</p><input type="number" id="dayRtp" class="bg-transparent text-sm font-bold text-white w-full text-center outline-none"></div>
-                    <div onclick="setActiveInput('dayBet')" id="boxDayBet" class="data-card p-1.5 rounded-lg text-center"><p class="text-[8px] text-gray-500 font-bold">當日投</p><input type="number" id="dayBet" class="bg-transparent text-sm font-bold text-white w-full text-center outline-none"></div>
-                    <div onclick="setActiveInput('monthRtp')" id="boxMonthRtp" class="data-card p-1.5 rounded-lg text-center"><p class="text-[8px] text-gray-400 font-bold">30日RTP</p><input type="number" id="monthRtp" class="bg-transparent text-sm font-bold text-gray-400 w-full text-center outline-none"></div>
-                    <div onclick="setActiveInput('monthBet')" id="boxMonthBet" class="data-card p-1.5 rounded-lg text-center"><p class="text-[8px] text-gray-400 font-bold">30日投</p><input type="number" id="monthBet" class="bg-transparent text-sm font-bold text-gray-400 w-full text-center outline-none"></div>
+                    <div onclick="setActiveInput('dayRtp')" id="boxDayRtp" class="data-card p-1.5 rounded-lg text-center"><p class="text-[8px] text-gray-500 font-bold uppercase">當日RTP</p><input type="number" id="dayRtp" class="bg-transparent text-sm font-bold text-white w-full text-center outline-none"></div>
+                    <div onclick="setActiveInput('dayBet')" id="boxDayBet" class="data-card p-1.5 rounded-lg text-center"><p class="text-[8px] text-gray-500 font-bold uppercase">當日投</p><input type="number" id="dayBet" class="bg-transparent text-sm font-bold text-white w-full text-center outline-none"></div>
+                    <div onclick="setActiveInput('monthRtp')" id="boxMonthRtp" class="data-card p-1.5 rounded-lg text-center"><p class="text-[8px] text-gray-400 font-bold uppercase">30日RTP</p><input type="number" id="monthRtp" class="bg-transparent text-sm font-bold text-gray-400 w-full text-center outline-none"></div>
+                    <div onclick="setActiveInput('monthBet')" id="boxMonthBet" class="data-card p-1.5 rounded-lg text-center"><p class="text-[8px] text-gray-400 font-bold uppercase">30日投</p><input type="number" id="monthBet" class="bg-transparent text-sm font-bold text-gray-400 w-full text-center outline-none"></div>
                 </div>
                 <button onclick="runDeepAnalysis()" class="w-full py-2.5 bg-indigo-600 rounded-xl font-black text-sm">啟動診斷</button>
             </div>
 
             <div id="pageLive" class="p-3 space-y-2 hidden-page">
                 <div class="grid grid-cols-4 gap-1 text-[8px] font-bold">
-                    <div onclick="setActiveInput('initCap')" id="boxInitCap" class="data-card p-1.5 rounded-lg text-center"><p class="text-gray-500">本金</p><input type="number" id="initCap" value="1000" class="bg-transparent text-white w-full text-center outline-none"></div>
-                    <div onclick="setActiveInput('targetX')" id="boxTargetX" class="data-card p-1.5 rounded-lg text-center"><p class="text-green-400">止盈X</p><input type="number" id="targetX" value="2" class="bg-transparent text-green-400 w-full text-center outline-none"></div>
-                    <div onclick="setActiveInput('baseBet')" id="boxBaseBet" class="data-card p-1.5 rounded-lg text-center"><p class="text-gray-500">基準</p><input type="number" id="baseBet" value="10" class="bg-transparent text-white w-full text-center outline-none"></div>
-                    <div onclick="setActiveInput('spinT')" id="boxSpinT" class="data-card p-1.5 rounded-lg text-center"><p class="text-blue-400">轉數</p><input type="number" id="spinT" value="50" class="bg-transparent text-blue-400 w-full text-center outline-none"></div>
+                    <div onclick="setActiveInput('initCap')" id="boxInitCap" class="data-card p-1.5 rounded-lg text-center"><p class="text-gray-500 uppercase">本金</p><input type="number" id="initCap" value="1000" class="bg-transparent text-white w-full text-center outline-none"></div>
+                    <div onclick="setActiveInput('targetX')" id="boxTargetX" class="data-card p-1.5 rounded-lg text-center"><p class="text-green-400 uppercase">止盈X</p><input type="number" id="targetX" value="2" class="bg-transparent text-green-400 w-full text-center outline-none"></div>
+                    <div onclick="setActiveInput('baseBet')" id="boxBaseBet" class="data-card p-1.5 rounded-lg text-center"><p class="text-gray-500 uppercase">基準</p><input type="number" id="baseBet" value="10" class="bg-transparent text-white w-full text-center outline-none"></div>
+                    <div onclick="setActiveInput('spinT')" id="boxSpinT" class="data-card p-1.5 rounded-lg text-center"><p class="text-blue-400 uppercase">轉數</p><input type="number" id="spinT" value="50" class="bg-transparent text-blue-400 w-full text-center outline-none"></div>
                 </div>
                 <div class="grid grid-cols-2 gap-2 mt-1">
-                    <div onclick="setActiveInput('sBal')" id="boxSBal" class="data-card p-2 rounded-xl border border-blue-600 text-center"><p class="text-[9px] text-gray-500 font-bold">前餘額</p><input type="number" id="sBal" class="w-full bg-transparent text-xl font-black text-center outline-none"></div>
-                    <div onclick="setActiveInput('eBal')" id="boxEBal" class="data-card p-2 rounded-xl border border-transparent text-center"><p class="text-[9px] text-gray-500 font-bold">後餘額</p><input type="number" id="eBal" class="w-full bg-transparent text-xl font-black text-center outline-none"></div>
+                    <div onclick="setActiveInput('sBal')" id="boxSBal" class="data-card p-2 rounded-xl border border-blue-600 text-center"><p class="text-[9px] text-gray-500 font-bold uppercase">前餘額</p><input type="number" id="sBal" class="w-full bg-transparent text-xl font-black text-center outline-none"></div>
+                    <div onclick="setActiveInput('eBal')" id="boxEBal" class="data-card p-2 rounded-xl border border-transparent text-center"><p class="text-[9px] text-gray-500 font-bold uppercase">後餘額</p><input type="number" id="eBal" class="w-full bg-transparent text-xl font-black text-center outline-none"></div>
                 </div>
                 <button onclick="runLiveStrategy()" class="w-full py-2.5 bg-blue-600 rounded-xl font-black text-sm">執行策略</button>
             </div>
@@ -91,11 +85,17 @@
         </div>
 
         <div class="flex-grow flex flex-col min-h-0 bg-[#111] rounded-[1.5rem] border border-white/5 mb-[env(safe-area-inset-bottom)]">
-            <div class="p-3 border-b border-white/5 flex justify-between items-center flex-shrink-0">
-                <span class="text-[10px] font-black text-gray-500 tracking-widest uppercase">Battle History</span>
-                <div class="flex space-x-3 text-[10px] font-bold">
-                    <span id="miniSpins" class="text-blue-400">0 T</span>
-                    <span id="miniRtp" class="text-green-400">0%</span>
+            <div class="p-3 border-b border-white/10 flex justify-between items-center flex-shrink-0 bg-white/5">
+                <div class="flex flex-col">
+                    <span class="text-[8px] text-gray-500 font-black uppercase tracking-tighter">Total Spins</span>
+                    <span id="totalSpinsDisplay" class="text-lg font-black text-blue-400 leading-tight">0</span>
+                </div>
+                <div class="text-center">
+                    <span class="text-[9px] font-black text-gray-400 uppercase tracking-widest">實戰數據歷史</span>
+                </div>
+                <div class="flex flex-col items-end">
+                    <span class="text-[8px] text-gray-500 font-black uppercase tracking-tighter">Global RTP</span>
+                    <span id="totalRtpDisplay" class="text-lg font-black text-green-400 leading-tight">0%</span>
                 </div>
             </div>
             <div id="historyList" class="flex-grow overflow-y-auto p-3">
@@ -105,11 +105,11 @@
 
     <script>
         let currentInputId = 'dayRtp', isFirstKey = true;
-        let cycle = 0, lastLiveRtp = null;
+        let cycle = 0;
         let totalSpins = 0, totalBetAmount = 0, totalReturnAmount = 0;
 
         window.onload = () => {
-            const saved = localStorage.getItem('steel_executor_data');
+            const saved = localStorage.getItem('steel_executor_v2');
             if (saved) {
                 const data = JSON.parse(saved);
                 totalSpins = data.spins || 0;
@@ -145,10 +145,12 @@
         }
 
         function updateBattleDisplay() {
+            document.getElementById('totalSpinsDisplay').innerText = totalSpins;
             const globalRtp = totalBetAmount > 0 ? (totalReturnAmount / totalBetAmount) * 100 : 0;
-            document.getElementById('miniSpins').innerText = totalSpins + " T";
-            document.getElementById('miniRtp').innerText = globalRtp.toFixed(1) + "%";
-            localStorage.setItem('steel_executor_data', JSON.stringify({ spins: totalSpins, bet: totalBetAmount, ret: totalReturnAmount }));
+            const rtpElem = document.getElementById('totalRtpDisplay');
+            rtpElem.innerText = globalRtp.toFixed(1) + "%";
+            rtpElem.style.color = globalRtp >= 100 ? "#4ade80" : "#fb7185";
+            localStorage.setItem('steel_executor_v2', JSON.stringify({ spins: totalSpins, bet: totalBetAmount, ret: totalReturnAmount }));
         }
 
         function runLiveStrategy() {
@@ -158,7 +160,7 @@
             const s = parseFloat(document.getElementById('sBal').value);
             const e = parseFloat(document.getElementById('eBal').value);
             const t = parseFloat(document.getElementById('spinT').value);
-            if (isNaN(e)) return;
+            if (isNaN(e) || isNaN(s)) return;
 
             const roundBet = bet * t;
             const roundReturn = e - s + roundBet;
@@ -166,8 +168,6 @@
 
             totalSpins += t; totalBetAmount += roundBet; totalReturnAmount += roundReturn;
             updateBattleDisplay();
-
-            if (e >= (init * targetX)) { document.body.classList.add('win-mode'); updateStatus("目標達成", "贏錢撤退", "#fff"); }
 
             let m = 1.0, res = "平打", col = "#3b82f6";
             if (rtp >= 160) { m = 3.0; res = "倍數 3X"; col = "#a855f7"; }
@@ -215,7 +215,7 @@
             list.prepend(row);
         }
 
-        function resetAll() { if(confirm("重置數據？")) { localStorage.removeItem('steel_executor_data'); location.reload(); } }
+        function resetAll() { if(confirm("確定重置數據？")) { localStorage.removeItem('steel_executor_v2'); location.reload(); } }
     </script>
 </body>
 </html>
