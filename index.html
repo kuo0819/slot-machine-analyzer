@@ -3,96 +3,87 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>鋼鐵執行者 - 波動演算版</title>
+    <title>鋼鐵執行者 - RTP 2.0 函數整合版</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         input::-webkit-outer-spin-button, input::-webkit-inner-spin-button { -webkit-appearance: none; }
-        .data-card { background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.1); }
+        .data-card { background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.1); transition: all 0.3s; }
         .progress-bar { height: 100%; transition: width 0.5s ease; }
         .lock-overlay { animation: pulse 1s infinite !important; filter: grayscale(1) !important; pointer-events: none !important; }
         @keyframes pulse { 0% { background-color: #450a0a; } 50% { background-color: #7f1d1d; } 100% { background-color: #450a0a; } }
         .win-lock-overlay { animation: winPulse 1s infinite !important; pointer-events: none !important; }
         @keyframes winPulse { 0% { background-color: #064e3b; } 50% { background-color: #065f46; } 100% { background-color: #064e3b; } }
         body { -webkit-tap-highlight-color: transparent; background-color: #050505; color: white; overflow-x: hidden; }
-        .multiplier-btn { transition: all 0.2s; border: 1px solid rgba(255,255,255,0.1); }
-        .multiplier-btn:active { background-color: #2563eb; transform: scale(0.95); }
-        .signal-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; margin-right: 4px; }
-        #helpModal { backdrop-filter: blur(12px); background: rgba(0,0,0,0.85); transition: all 0.3s; }
-        #historyList { scrollbar-width: none; -ms-overflow-style: none; }
+        .signal-dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; margin-right: 6px; }
         #historyList::-webkit-scrollbar { display: none; }
+        .active-box { border-color: #3b82f6 !important; background: rgba(59, 130, 246, 0.1); }
     </style>
 </head>
 <body class="min-h-screen flex flex-col items-center p-4 font-sans select-none pb-12">
-
-    <button onclick="toggleHelp(true)" class="fixed bottom-6 right-6 z-40 bg-blue-600 shadow-[0_0_15px_rgba(37,99,235,0.5)] p-3 rounded-full border border-white/20 active:scale-90 transition-all">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-        </svg>
-    </button>
 
     <div class="max-w-md w-full space-y-4">
         <div id="mainContainer" class="bg-[#111] rounded-[2.5rem] overflow-hidden border border-gray-800 shadow-2xl">
             <div id="statusBg" class="p-6 text-center bg-gray-900 border-b border-white/5 transition-all">
                 <div class="flex justify-between items-center mb-1">
                     <span id="spinCounter" class="text-[10px] font-mono text-gray-500">週期: 0</span>
-                    <span id="signalTag" class="px-2 py-0.5 rounded text-[10px] font-black bg-gray-700 text-white uppercase tracking-tighter">等待數據輸入</span>
+                    <button onclick="resetData()" class="px-2 py-0.5 rounded text-[10px] font-black bg-red-900/40 text-red-400 border border-red-900/50 active:scale-95">自動清除模組</button>
                 </div>
                 <h1 class="text-2xl font-black mb-1 flex items-center justify-center">
                     <span id="statusIndicator" class="signal-dot bg-gray-600"></span>
-                    <span id="mainStatus">系統待命</span>
+                    <span id="mainStatus">等待數據輸入</span>
                 </h1>
-                <p id="totalPlDisplay" class="text-[10px] font-bold text-gray-500 uppercase tracking-widest">總損益: 0</p>
+                <div class="flex justify-center gap-2 items-center">
+                    <p id="totalPlDisplay" class="text-[10px] font-bold text-gray-500 uppercase tracking-widest">總損益: 0</p>
+                    <span id="trendTag" class="text-[9px] px-1 bg-white/5 rounded text-gray-500">穩定</span>
+                </div>
                 <div class="mt-4 px-4">
                     <div class="bg-white/5 h-1.5 rounded-full overflow-hidden">
-                        <div id="progressBar" class="progress-bar w-0 bg-blue-500 shadow-[0_0_8px_#3b82f6]"></div>
+                        <div id="progressBar" class="progress-bar w-0 bg-blue-500"></div>
                     </div>
                 </div>
             </div>
 
             <div class="p-5 space-y-4">
-                <div class="flex justify-between gap-2">
-                    <button onclick="setFastMultiplier(1.5)" class="multiplier-btn flex-1 py-2 text-[10px] font-black rounded-xl bg-white/5 text-gray-400">1.5x</button>
-                    <button onclick="setFastMultiplier(2)" class="multiplier-btn flex-1 py-2 text-[10px] font-black rounded-xl bg-white/5 text-gray-400">2.0x</button>
-                    <button onclick="setFastMultiplier(3)" class="multiplier-btn flex-1 py-2 text-[10px] font-black rounded-xl bg-white/5 text-gray-400">3.0x</button>
-                    <button onclick="setFastMultiplier(4)" class="multiplier-btn flex-1 py-2 text-[10px] font-black rounded-xl bg-white/5 text-gray-400">4.0x</button>
-                </div>
-
-                <div class="grid grid-cols-3 gap-2">
+                <div class="grid grid-cols-4 gap-2">
                     <div onclick="setActiveInput('initialCapital')" id="boxCapital" class="data-card p-2 rounded-xl text-center border-2 border-transparent">
                         <p class="text-[9px] text-gray-500 mb-1 font-bold">初始本金</p>
-                        <input type="number" id="initialCapital" value="1000" class="bg-transparent text-sm font-mono font-bold text-white outline-none w-full text-center pointer-events-none" readonly>
+                        <input type="number" id="initialCapital" value="1000" class="bg-transparent text-xs font-mono font-bold text-white outline-none w-full text-center pointer-events-none" readonly>
                     </div>
-                    <div onclick="setActiveInput('targetGoal')" id="boxGoal" class="data-card p-2 rounded-xl text-center border-2 border-transparent bg-green-900/10">
+                    <div onclick="setActiveInput('targetGoal')" id="boxGoal" class="data-card p-2 rounded-xl text-center border-2 border-transparent">
                         <p class="text-[9px] text-green-400 mb-1 font-bold">止盈目標</p>
-                        <input type="number" id="targetGoal" class="bg-transparent text-sm font-mono font-bold text-green-400 outline-none w-full text-center pointer-events-none" readonly>
+                        <input type="number" id="targetGoal" class="bg-transparent text-xs font-mono font-bold text-green-400 outline-none w-full text-center pointer-events-none" readonly>
                     </div>
                     <div onclick="setActiveInput('currentBet')" id="boxBet" class="data-card p-2 rounded-xl text-center border-2 border-transparent">
-                        <p class="text-[9px] text-gray-500 mb-1 font-bold">基準單注</p>
-                        <input type="number" id="currentBet" value="1" class="bg-transparent text-sm font-mono font-bold text-white outline-none w-full text-center pointer-events-none" readonly>
+                        <p class="text-[9px] text-gray-500 mb-1 font-bold">單注金額</p>
+                        <input type="number" id="currentBet" value="1" class="bg-transparent text-xs font-mono font-bold text-white outline-none w-full text-center pointer-events-none" readonly>
+                    </div>
+                    <div onclick="setActiveInput('customSpins')" id="boxSpins" class="data-card p-2 rounded-xl text-center border-2 border-transparent">
+                        <p class="text-[9px] text-blue-400 mb-1 font-bold">計算轉數</p>
+                        <input type="number" id="customSpins" value="100" class="bg-transparent text-xs font-mono font-bold text-blue-400 outline-none w-full text-center pointer-events-none" readonly>
                     </div>
                 </div>
 
                 <div class="grid grid-cols-2 gap-3">
                     <div onclick="setActiveInput('startBalance')" id="boxStart" class="data-card p-4 rounded-2xl border-2 border-blue-600 text-center">
-                        <p class="text-[10px] text-gray-500 mb-1 font-bold">100轉前金額</p>
+                        <p id="labelStart" class="text-[10px] text-gray-500 mb-1 font-bold">100轉前金額</p>
                         <input type="number" id="startBalance" class="w-full bg-transparent text-2xl font-bold outline-none text-center pointer-events-none" placeholder="0" readonly>
                     </div>
                     <div onclick="setActiveInput('endBalance')" id="boxEnd" class="data-card p-4 rounded-2xl border-2 border-transparent text-center">
-                        <p class="text-[10px] text-gray-500 mb-1 font-bold">100轉後金額</p>
+                        <p id="labelEnd" class="text-[10px] text-gray-500 mb-1 font-bold">100轉後金額</p>
                         <input type="number" id="endBalance" class="w-full bg-transparent text-2xl font-bold outline-none text-center pointer-events-none" placeholder="0" readonly>
                     </div>
                 </div>
 
                 <div class="bg-white/[0.02] p-4 rounded-3xl border border-white/10 flex justify-between items-center px-6">
-                    <div class="text-left">
-                        <p class="text-[9px] text-gray-500 font-bold mb-1">當前 RTP / 波動</p>
+                    <div>
+                        <p class="text-[9px] text-gray-500 font-bold mb-1 uppercase">RTP 函數階級</p>
                         <div class="flex items-baseline gap-2">
                             <p id="rtpDisplay" class="text-xl font-mono font-bold text-gray-400">---%</p>
-                            <p id="volDisplay" class="text-[10px] font-bold text-blue-500">穩定</p>
+                            <span id="rankDisplay" class="text-[10px] font-black px-1.5 py-0.5 rounded bg-gray-800 text-gray-400">階級 --</span>
                         </div>
                     </div>
                     <div class="text-right">
-                        <p class="text-[9px] text-blue-500 font-bold mb-1 uppercase tracking-widest">下一手單注</p>
+                        <p class="text-[9px] text-blue-500 font-bold mb-1 uppercase">建議注碼</p>
                         <p id="targetBetDisplay" class="text-4xl font-black text-white">$ ---</p>
                     </div>
                 </div>
@@ -114,68 +105,61 @@
             </div>
         </div>
 
-        <div class="bg-[#111] rounded-3xl border border-white/5 overflow-hidden">
-            <div class="px-4 py-2 border-b border-white/5 flex justify-between">
-                <span class="text-[9px] font-black text-gray-500 uppercase tracking-widest">歷史紀錄清單</span>
-                <span class="text-[9px] font-black text-blue-500 uppercase">最新優先</span>
-            </div>
-            <div id="historyList" class="max-h-48 overflow-y-auto"></div>
-        </div>
+        <div id="historyList" class="bg-[#111] rounded-3xl border border-white/5 max-h-40 overflow-y-auto"></div>
     </div>
 
     <script>
         let currentInputId = 'startBalance';
         let cycleCount = 0;
         let isLocked = false;
-        let rtpHistory = []; 
-        const VOLATILITY_WINDOW = 5; 
+        let rtpHistory = [];
+        let lastRtp = 0;
 
-        window.onload = () => {
-            const lockUntil = localStorage.getItem('lockUntil');
-            if (lockUntil && Date.now() < lockUntil) startLockdown(Math.ceil((lockUntil - Date.now()) / 1000), localStorage.getItem('lockType') === 'win');
-            setFastMultiplier(1.5);
-            document.getElementById('startBalance').value = document.getElementById('initialCapital').value;
-        };
+        // 影片功能 1: 六階分界制度 (RTP 階級)
+        const RTP_RANKS = [
+            { min: 180, label: "階級 6 (狂暴)", color: "#a855f7", m: 2.0 },
+            { min: 140, label: "階級 5 (大熱)", color: "#ec4899", m: 1.5 },
+            { min: 100, label: "階級 4 (回溫)", color: "#22c55e", m: 1.2 },
+            { min: 80, label: "階級 3 (洗盤)", color: "#3b82f6", m: 1.0 },
+            { min: 50, label: "階級 2 (失溫)", color: "#f59e0b", m: 0.5 },
+            { min: 0, label: "階級 1 (極凍)", color: "#ef4444", m: 0.2 }
+        ];
 
-        function toggleHelp(show) {
-            const modal = document.getElementById('helpModal');
-            modal.style.opacity = show ? '1' : '0';
-            modal.style.pointerEvents = show ? 'auto' : 'none';
+        function getRank(rtp) {
+            return RTP_RANKS.find(r => rtp >= r.min) || RTP_RANKS[RTP_RANKS.length - 1];
         }
 
-        function setFastMultiplier(m) {
-            if (isLocked) return;
-            const cap = parseFloat(document.getElementById('initialCapital').value) || 0;
-            document.getElementById('targetGoal').value = Math.floor(cap * m);
-            document.getElementById('mainStatus').innerText = `目標：${m}x`;
+        // 影片功能 2: 自動清除模組
+        function resetData() {
+            if(!confirm("確定要清除所有數據重開一局嗎？")) return;
+            cycleCount = 0;
+            rtpHistory = [];
+            lastRtp = 0;
+            document.getElementById('historyList').innerHTML = '';
+            document.getElementById('totalPlDisplay').innerText = "總損益: 0";
+            document.getElementById('spinCounter').innerText = "週期: 0";
+            document.getElementById('mainStatus').innerText = "數據已清除";
+            document.getElementById('rtpDisplay').innerText = "---%";
+            document.getElementById('targetBetDisplay').innerText = "$ ---";
         }
 
         function setActiveInput(id) {
             if (isLocked) return;
             currentInputId = id;
-            ['boxCapital','boxGoal','boxBet','boxStart','boxEnd'].forEach(box => document.getElementById(box).style.borderColor = 'transparent');
-            const activeBox = (id === 'initialCapital') ? 'boxCapital' : (id === 'targetGoal') ? 'boxGoal' : (id === 'currentBet') ? 'boxBet' : (id === 'startBalance') ? 'boxStart' : 'boxEnd';
-            document.getElementById(activeBox).style.borderColor = '#2563eb';
+            document.querySelectorAll('.data-card').forEach(box => box.classList.remove('active-box'));
+            const activeBoxId = id === 'initialCapital' ? 'boxCapital' : id === 'targetGoal' ? 'boxGoal' : id === 'currentBet' ? 'boxBet' : id === 'customSpins' ? 'boxSpins' : id === 'startBalance' ? 'boxStart' : 'boxEnd';
+            document.getElementById(activeBoxId).classList.add('active-box');
         }
 
         function pressKey(key) {
             if (isLocked) return;
             const input = document.getElementById(currentInputId);
             if (key === 'C') input.value = ''; else input.value += key;
-            if (currentInputId === 'initialCapital') setFastMultiplier(1.5);
-        }
-
-        // --- 核心邏輯：計算波動率 ---
-        function getVolatilityInfo() {
-            if (rtpHistory.length < 3) return { level: "數據中", factor: 1.0, color: "#6b7280" };
-            
-            const mean = rtpHistory.reduce((a, b) => a + b) / rtpHistory.length;
-            const variance = rtpHistory.reduce((a, b) => a + Math.pow(b - mean, 2), 0) / rtpHistory.length;
-            const sd = Math.sqrt(variance);
-
-            if (sd < 15) return { level: "穩定", factor: 1.0, color: "#3b82f6" }; 
-            if (sd < 45) return { level: "跳動", factor: 1.2, color: "#f59e0b" }; 
-            return { level: "激進", factor: 1.5, color: "#ef4444" }; 
+            if (currentInputId === 'customSpins') {
+                const val = input.value || '0';
+                document.getElementById('labelStart').innerText = `${val}轉前金額`;
+                document.getElementById('labelEnd').innerText = `${val}轉後金額`;
+            }
         }
 
         function calculate() {
@@ -185,120 +169,74 @@
             const start = parseFloat(document.getElementById('startBalance').value);
             const end = parseFloat(document.getElementById('endBalance').value);
             const bet = parseFloat(document.getElementById('currentBet').value);
+            const spins = parseFloat(document.getElementById('customSpins').value) || 100;
 
             if (isNaN(start) || isNaN(end)) return;
-            
+
             const profit = end - start;
-            const rtp = ((profit + (bet * 100)) / (bet * 100)) * 100;
+            const rtp = ((profit + (bet * spins)) / (bet * spins)) * 100;
             const totalPl = end - capital;
 
-            // 紀錄歷史
-            rtpHistory.push(rtp);
-            if (rtpHistory.length > VOLATILITY_WINDOW) rtpHistory.shift();
-            
-            const vol = getVolatilityInfo();
+            // 影片功能 3: 升降分視覺化判斷 (Trend)
+            const trend = rtp > lastRtp ? "上升 ⬆️" : "下降 ⬇️";
+            const trendColor = rtp > lastRtp ? "#4ade80" : "#fb7185";
+            lastRtp = rtp;
 
-            if (end >= goal) { triggerLock(180, "🏆 達成止盈", true); return; }
-            if (end <= capital * 0.5) { triggerLock(300, "🚨 觸發止損", false); return; }
-
+            const rank = getRank(rtp);
             cycleCount++;
-            updateSignal(rtp);
-            updateUI(rtp, totalPl, end, capital, goal, vol);
-            
-            // --- 改良版注碼公式 ---
-            // 基本倍率 m
-            let m = (rtp < 75) ? 0.2 : (rtp > 145 ? 1.5 : 1.0);
-            
-            // 波動加權：如果是激進波動且 RTP 高，加注更猛；如果是激進且 RTP 低，縮注更狠
-            if (vol.level === "激進") {
-                m = (rtp > 100) ? m * 1.3 : m * 0.5;
-            }
+
+            // 更新 UI
+            updateUI(rtp, totalPl, end, capital, goal, rank, trend, trendColor);
+
+            // 計算注碼 (基礎倍率 * 趨勢加成)
+            let m = rank.m;
+            if (trend.includes("上升") && rtp > 100) m *= 1.2; // 順勢加注
 
             const nextBet = (bet * m).toFixed(1);
             document.getElementById('targetBetDisplay').innerText = "$ " + nextBet;
-            addHistory(rtp, profit, nextBet, vol.level);
 
+            addHistory(rtp, profit, nextBet, rank.label, spins);
+            
             document.getElementById('startBalance').value = end;
             document.getElementById('endBalance').value = '';
             setActiveInput('endBalance');
         }
 
-        function updateSignal(rtp) {
-            const dot = document.getElementById('statusIndicator');
-            const tag = document.getElementById('signalTag');
-            const status = document.getElementById('mainStatus');
+        function updateUI(rtp, totalPl, end, capital, goal, rank, trend, trendColor) {
+            const rtpEl = document.getElementById('rtpDisplay');
+            rtpEl.innerText = rtp.toFixed(1) + "%";
+            rtpEl.style.color = rank.color;
 
-            if (rtp > 150) {
-                dot.className = "signal-dot bg-purple-500 shadow-[0_0_8px_#a855f7]";
-                tag.innerText = "🚨 爆發期";
-                tag.className = "px-2 py-0.5 rounded text-[10px] font-black bg-purple-600 text-white";
-                status.innerText = "建議加注";
-            } else if (rtp >= 90) {
-                dot.className = "signal-dot bg-green-500 shadow-[0_0_8px_#22c55e]";
-                tag.innerText = "✅ 洗盤期";
-                tag.className = "px-2 py-0.5 rounded text-[10px] font-black bg-green-600 text-white";
-                status.innerText = "正常觀察";
-            } else {
-                dot.className = "signal-dot bg-red-600 shadow-[0_0_8px_#dc2626]";
-                tag.innerText = "💀 極凍期";
-                tag.className = "px-2 py-0.5 rounded text-[10px] font-black bg-red-600 text-white";
-                status.innerText = "減注避險";
-            }
-        }
+            const rankEl = document.getElementById('rankDisplay');
+            rankEl.innerText = rank.label;
+            rankEl.style.backgroundColor = rank.color + "33";
+            rankEl.style.color = rank.color;
 
-        function triggerLock(seconds, msg, isWin) {
-            localStorage.setItem('lockUntil', Date.now() + (seconds * 1000));
-            localStorage.setItem('lockType', isWin ? 'win' : 'loss');
-            startLockdown(seconds, isWin);
-        }
-
-        function startLockdown(seconds, isWin) {
-            isLocked = true;
-            const container = document.getElementById('mainContainer');
-            const okBtn = document.getElementById('okBtn');
-            container.classList.add(isWin ? 'win-lock-overlay' : 'lock-overlay');
-            document.getElementById('mainStatus').innerText = isWin ? "執行提款" : "冷靜中止";
-
-            const timer = setInterval(() => {
-                const remaining = Math.ceil((localStorage.getItem('lockUntil') - Date.now()) / 1000);
-                if (remaining <= 0) {
-                    clearInterval(timer);
-                    isLocked = false;
-                    container.classList.remove('lock-overlay', 'win-lock-overlay');
-                    okBtn.innerText = "確認";
-                    localStorage.removeItem('lockType');
-                } else {
-                    okBtn.innerText = remaining + "s";
-                }
-            }, 1000);
-        }
-
-        function updateUI(rtp, totalPl, end, capital, goal, vol) {
-            document.getElementById('rtpDisplay').innerText = rtp.toFixed(1) + "%";
-            document.getElementById('rtpDisplay').style.color = rtp > 100 ? '#4ade80' : '#ef4444';
+            document.getElementById('mainStatus').innerText = rank.label.split(' ')[2];
+            document.getElementById('statusIndicator').style.backgroundColor = rank.color;
             
-            const vDisp = document.getElementById('volDisplay');
-            vDisp.innerText = vol.level;
-            vDisp.style.color = vol.color;
+            const trendEl = document.getElementById('trendTag');
+            trendEl.innerText = trend;
+            trendEl.style.color = trendColor;
 
             document.getElementById('totalPlDisplay').innerText = `總損益: ${totalPl.toFixed(0)}`;
-            document.getElementById('totalPlDisplay').style.color = totalPl >= 0 ? '#4ade80' : '#ef4444';
             document.getElementById('spinCounter').innerText = `週期: ${cycleCount}`;
+            
             let progress = ((end - (capital * 0.5)) / (goal - (capital * 0.5))) * 100;
             document.getElementById('progressBar').style.width = Math.min(Math.max(progress, 0), 100) + "%";
         }
 
-        function addHistory(rtp, profit, target, volLabel) {
+        function addHistory(rtp, profit, target, rankLabel, spins) {
             const list = document.getElementById('historyList');
             const row = document.createElement('div');
-            row.className = 'p-4 border-b border-white/5 flex justify-between items-center bg-white/[0.01]';
+            row.className = 'p-3 border-b border-white/5 flex justify-between items-center text-[11px]';
             row.innerHTML = `
-                <div>
-                    <span class="text-gray-500 text-[9px]">#${cycleCount}</span> 
-                    <b class="ml-2 font-mono">${rtp.toFixed(1)}%</b>
-                    <span class="ml-1 text-[8px] opacity-50">[${volLabel}]</span>
+                <div class="flex flex-col">
+                    <span class="text-gray-500">#${cycleCount} (${spins}T)</span>
+                    <span style="color:${getRank(rtp).color}">${rankLabel}</span>
                 </div>
-                <div class="${profit>=0?'text-green-400':'text-red-400'} font-bold text-sm">${profit>=0?'+':''}${profit.toFixed(0)}</div>
+                <b class="font-mono text-sm">${rtp.toFixed(1)}%</b>
+                <div class="${profit>=0?'text-green-400':'text-red-400'} font-bold">${profit>=0?'+':''}${profit.toFixed(0)}</div>
                 <div class="text-blue-400 font-black">$ ${target}</div>
             `;
             list.prepend(row);
