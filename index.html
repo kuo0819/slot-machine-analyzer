@@ -3,43 +3,51 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>鋼鐵執行者 - 歷史最大化版</title>
+    <title>鋼鐵執行者 - 避開瀏海版</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         * { touch-action: manipulation; -webkit-tap-highlight-color: transparent; -webkit-user-select: none; }
-        body { background-color: #050505; color: white; overflow: hidden; height: 100vh; display: flex; flex-direction: column; }
+        
+        /* 核心修正：自動避開手機頂部時間與瀏海區域 */
+        body { 
+            background-color: #050505; 
+            color: white; 
+            overflow: hidden; 
+            height: 100vh; 
+            display: flex; 
+            flex-direction: column;
+            padding-top: env(safe-area-inset-top); /* iPhone 瀏海關鍵字 */
+        }
+
         .data-card { background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.1); }
         .active-box { border-color: #3b82f6 !important; background: rgba(59, 130, 246, 0.15); box-shadow: 0 0 8px rgba(59, 130, 246, 0.2); }
         input { pointer-events: none; }
         .tab-active { color: #3b82f6; border-bottom: 2px solid #3b82f6; font-weight: 900; }
         .hidden-page { display: none; }
-        .volt-flash { animation: pulse 0.8s infinite; }
-        @keyframes pulse { 0% { opacity: 1; box-shadow: 0 0 15px currentColor; } 50% { opacity: 0.3; } 100% { opacity: 1; box-shadow: 0 0 15px currentColor; } }
-        .tilt-mode { background-color: #450a0a !important; }
         .win-mode { background-color: #064e3b !important; }
+        .tilt-mode { background-color: #450a0a !important; }
         
-        /* 歷史紀錄大字體 */
         .history-row { padding: 12px; margin-bottom: 8px; border-radius: 12px; background: rgba(255, 255, 255, 0.05); border-left-width: 6px; }
         .history-val { font-size: 20px; font-weight: 900; }
     </style>
 </head>
-<body class="p-2 font-sans">
+<body class="px-2 pb-2">
 
     <div class="max-w-md w-full h-full flex flex-col mx-auto space-y-2">
         
-        <div class="bg-[#111] rounded-[1.5rem] border border-gray-800 overflow-hidden flex-shrink-0">
+        <div class="bg-[#111] rounded-[1.5rem] border border-gray-800 overflow-hidden flex-shrink-0 mt-2">
             <div id="statusHeader" class="p-3 text-center bg-gray-900/50 border-b border-white/5 relative">
                 <div class="absolute top-3 right-4 flex flex-col items-center">
                     <div id="voltLight" class="w-2.5 h-2.5 rounded-full bg-gray-600 mb-0.5"></div>
                     <span id="voltText" class="text-[7px] font-bold text-gray-500 uppercase">VOLT</span>
                 </div>
                 <h1 id="mainAction" class="text-xl font-black text-white">等待數據</h1>
-                <div id="subText" class="text-[10px] text-blue-400 font-bold uppercase">System Ready</div>
+                <div id="subText" class="text-[10px] text-blue-400 font-bold uppercase">Ready</div>
             </div>
 
-            <div class="flex justify-around border-b border-white/5 bg-black/20">
-                <button onclick="switchPage('room')" id="tabRoom" class="flex-1 py-2 text-[11px] text-gray-500 tab-active">房間診斷</button>
-                <button onclick="switchPage('live')" id="tabLive" class="flex-1 py-2 text-[11px] text-gray-500">測速策略</button>
+            <div class="flex justify-around border-b border-white/5 bg-black/20 text-[11px] text-gray-500">
+                <button onclick="switchPage('room')" id="tabRoom" class="flex-1 py-2 tab-active">房間診斷</button>
+                <button onclick="switchPage('live')" id="tabLive" class="flex-1 py-2">測速策略</button>
             </div>
 
             <div id="pageRoom" class="p-3 space-y-2">
@@ -49,21 +57,21 @@
                     <div onclick="setActiveInput('monthRtp')" id="boxMonthRtp" class="data-card p-1.5 rounded-lg text-center"><p class="text-[8px] text-gray-400 font-bold">30日RTP</p><input type="number" id="monthRtp" class="bg-transparent text-sm font-bold text-gray-400 w-full text-center outline-none"></div>
                     <div onclick="setActiveInput('monthBet')" id="boxMonthBet" class="data-card p-1.5 rounded-lg text-center"><p class="text-[8px] text-gray-400 font-bold">30日投</p><input type="number" id="monthBet" class="bg-transparent text-sm font-bold text-gray-400 w-full text-center outline-none"></div>
                 </div>
-                <button onclick="runDeepAnalysis()" class="w-full py-2.5 bg-indigo-600 rounded-xl font-black text-white text-sm shadow-lg">啟動深度分析</button>
+                <button onclick="runDeepAnalysis()" class="w-full py-2.5 bg-indigo-600 rounded-xl font-black text-sm">啟動診斷</button>
             </div>
 
             <div id="pageLive" class="p-3 space-y-2 hidden-page">
-                <div class="grid grid-cols-4 gap-1">
-                    <div onclick="setActiveInput('initCap')" id="boxInitCap" class="data-card p-1.5 rounded-lg text-center"><p class="text-[8px] text-gray-500 font-bold">本金</p><input type="number" id="initCap" value="1000" class="bg-transparent text-xs font-bold text-white w-full text-center outline-none"></div>
-                    <div onclick="setActiveInput('targetX')" id="boxTargetX" class="data-card p-1.5 rounded-lg text-center border-green-500/30"><p class="text-[8px] text-green-400 font-bold">止盈X</p><input type="number" id="targetX" value="2" class="bg-transparent text-xs font-bold text-green-400 w-full text-center outline-none"></div>
-                    <div onclick="setActiveInput('baseBet')" id="boxBaseBet" class="data-card p-1.5 rounded-lg text-center"><p class="text-[8px] text-gray-500 font-bold">基準</p><input type="number" id="baseBet" value="10" class="bg-transparent text-xs font-bold text-white w-full text-center outline-none"></div>
-                    <div onclick="setActiveInput('spinT')" id="boxSpinT" class="data-card p-1.5 rounded-lg text-center"><p class="text-[8px] text-blue-400 font-bold">轉數</p><input type="number" id="spinT" value="50" class="bg-transparent text-xs font-bold text-blue-400 w-full text-center outline-none"></div>
+                <div class="grid grid-cols-4 gap-1 text-[8px] font-bold">
+                    <div onclick="setActiveInput('initCap')" id="boxInitCap" class="data-card p-1.5 rounded-lg text-center"><p class="text-gray-500">本金</p><input type="number" id="initCap" value="1000" class="bg-transparent text-white w-full text-center outline-none"></div>
+                    <div onclick="setActiveInput('targetX')" id="boxTargetX" class="data-card p-1.5 rounded-lg text-center"><p class="text-green-400">止盈X</p><input type="number" id="targetX" value="2" class="bg-transparent text-green-400 w-full text-center outline-none"></div>
+                    <div onclick="setActiveInput('baseBet')" id="boxBaseBet" class="data-card p-1.5 rounded-lg text-center"><p class="text-gray-500">基準</p><input type="number" id="baseBet" value="10" class="bg-transparent text-white w-full text-center outline-none"></div>
+                    <div onclick="setActiveInput('spinT')" id="boxSpinT" class="data-card p-1.5 rounded-lg text-center"><p class="text-blue-400">轉數</p><input type="number" id="spinT" value="50" class="bg-transparent text-blue-400 w-full text-center outline-none"></div>
                 </div>
-                <div class="grid grid-cols-2 gap-2">
-                    <div onclick="setActiveInput('sBal')" id="boxSBal" class="data-card p-2 rounded-xl border border-blue-600 text-center"><p class="text-[9px] text-gray-500 font-bold uppercase">前餘額</p><input type="number" id="sBal" class="w-full bg-transparent text-xl font-black text-center outline-none"></div>
-                    <div onclick="setActiveInput('eBal')" id="boxEBal" class="data-card p-2 rounded-xl border border-transparent text-center"><p class="text-[9px] text-gray-500 font-bold uppercase">後餘額</p><input type="number" id="eBal" class="w-full bg-transparent text-xl font-black text-center outline-none"></div>
+                <div class="grid grid-cols-2 gap-2 mt-1">
+                    <div onclick="setActiveInput('sBal')" id="boxSBal" class="data-card p-2 rounded-xl border border-blue-600 text-center"><p class="text-[9px] text-gray-500 font-bold">前餘額</p><input type="number" id="sBal" class="w-full bg-transparent text-xl font-black text-center outline-none"></div>
+                    <div onclick="setActiveInput('eBal')" id="boxEBal" class="data-card p-2 rounded-xl border border-transparent text-center"><p class="text-[9px] text-gray-500 font-bold">後餘額</p><input type="number" id="eBal" class="w-full bg-transparent text-xl font-black text-center outline-none"></div>
                 </div>
-                <button onclick="runLiveStrategy()" class="w-full py-2.5 bg-blue-600 rounded-xl font-black text-white text-sm">計算策略</button>
+                <button onclick="runLiveStrategy()" class="w-full py-2.5 bg-blue-600 rounded-xl font-black text-sm">執行策略</button>
             </div>
 
             <div class="p-3 pt-0 grid grid-cols-6 gap-1 flex-shrink-0">
@@ -82,9 +90,9 @@
             </div>
         </div>
 
-        <div class="flex-grow flex flex-col min-h-0 bg-[#111] rounded-[1.5rem] border border-white/5">
+        <div class="flex-grow flex flex-col min-h-0 bg-[#111] rounded-[1.5rem] border border-white/5 mb-[env(safe-area-inset-bottom)]">
             <div class="p-3 border-b border-white/5 flex justify-between items-center flex-shrink-0">
-                <span class="text-[10px] font-black text-gray-500 uppercase tracking-widest">實戰歷史紀錄簿</span>
+                <span class="text-[10px] font-black text-gray-500 tracking-widest uppercase">Battle History</span>
                 <div class="flex space-x-3 text-[10px] font-bold">
                     <span id="miniSpins" class="text-blue-400">0 T</span>
                     <span id="miniRtp" class="text-green-400">0%</span>
@@ -97,7 +105,7 @@
 
     <script>
         let currentInputId = 'dayRtp', isFirstKey = true;
-        let cycle = 0, lastLiveRtp = null, lossStreak = 0;
+        let cycle = 0, lastLiveRtp = null;
         let totalSpins = 0, totalBetAmount = 0, totalReturnAmount = 0;
 
         window.onload = () => {
@@ -156,12 +164,10 @@
             const roundReturn = e - s + roundBet;
             const rtp = (roundReturn / roundBet) * 100;
 
-            totalSpins += t;
-            totalBetAmount += roundBet;
-            totalReturnAmount += roundReturn;
+            totalSpins += t; totalBetAmount += roundBet; totalReturnAmount += roundReturn;
             updateBattleDisplay();
 
-            if (e >= (init * targetX)) { document.body.classList.add('win-mode'); updateStatus("目標達成", "收手離場", "#fff"); }
+            if (e >= (init * targetX)) { document.body.classList.add('win-mode'); updateStatus("目標達成", "贏錢撤退", "#fff"); }
 
             let m = 1.0, res = "平打", col = "#3b82f6";
             if (rtp >= 160) { m = 3.0; res = "倍數 3X"; col = "#a855f7"; }
@@ -181,8 +187,8 @@
             const diff = dR - mR;
             let res = "數據平穩", col = "#22c55e";
             if (diff > 5) { res = "起漲訊號 🚀", col = "#a855f7"; }
-            else if (dR < 88) { res = "避開陷阱 ⛔", col = "#ef4444"; }
-            updateStatus("分析結果", res, col);
+            else if (dR < 88) { res = "強抽水中 ⛔", col = "#ef4444"; }
+            updateStatus("分析完畢", res, col);
             addHistory("診斷", `差值: ${diff.toFixed(1)}%`, res, col);
         }
 
@@ -196,8 +202,7 @@
         function addHistory(type, data, res, col) {
             const list = document.getElementById('historyList');
             const row = document.createElement('div');
-            row.className = 'history-row';
-            row.style.borderColor = col;
+            row.className = 'history-row'; row.style.borderColor = col;
             row.innerHTML = `
                 <div class="flex justify-between items-center">
                     <div>
@@ -206,12 +211,11 @@
                         <div class="text-[12px] text-gray-400 font-bold">${data}</div>
                     </div>
                     <div class="text-[10px] text-gray-600 font-mono">${new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})}</div>
-                </div>
-            `;
+                </div>`;
             list.prepend(row);
         }
 
-        function resetAll() { if(confirm("確定重置數據？")) { localStorage.removeItem('steel_executor_data'); location.reload(); } }
+        function resetAll() { if(confirm("重置數據？")) { localStorage.removeItem('steel_executor_data'); location.reload(); } }
     </script>
 </body>
 </html>
