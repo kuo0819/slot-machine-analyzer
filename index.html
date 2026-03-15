@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>鋼鐵執行者 - 數據全整合版</title>
+    <title>鋼鐵執行者 - 30日深度分析版</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         * { touch-action: manipulation; -webkit-tap-highlight-color: transparent; -webkit-user-select: none; }
@@ -25,36 +25,39 @@
             <div class="p-3 text-center border-b border-white/5 relative">
                 <div class="absolute left-4 top-4">
                     <select id="volMode" class="bg-gray-800 text-[10px] font-bold p-1 rounded border border-gray-600 outline-none">
-                        <option value="high">高波動 (賽特)</option>
-                        <option value="med">中波動 (金寶)</option>
+                        <option value="high">高波動 (賽特/雷神)</option>
+                        <option value="med">中波動 (金寶/四川)</option>
                     </select>
                 </div>
-                <h1 id="mainAction" class="text-xl font-black italic tracking-tighter">DATA EXECUTOR</h1>
-                <div id="subText" class="text-[9px] text-blue-400 font-bold tracking-widest">AWAITING SYSTEM INPUT</div>
+                <h1 id="mainAction" class="text-xl font-black italic tracking-tighter">PREDICTOR V4</h1>
+                <div id="subText" class="text-[9px] text-blue-400 font-bold tracking-widest uppercase">Analyzing Cycle Data</div>
             </div>
 
             <div class="flex justify-around border-b border-white/5 bg-black/40 text-[11px] text-gray-400">
                 <button onclick="switchPage('room')" id="tabRoom" class="flex-1 py-3 tab-active">大數據選房</button>
-                <button onclick="switchPage('live')" id="tabLive" class="flex-1 py-3">實戰控注</button>
+                <button onclick="switchPage('live')" id="tabLive" class="flex-1 py-3">測速與控注</button>
             </div>
 
             <div id="pageRoom" class="p-3 space-y-3">
                 <div class="grid grid-cols-2 gap-2">
-                    <div onclick="setActiveInput('dayBet')" id="boxDayBet" class="data-card p-3 rounded-xl text-center">
+                    <div onclick="setActiveInput('dayBet')" id="boxDayBet" class="data-card p-2.5 rounded-xl text-center">
                         <p class="input-label text-blue-400">今日總下注</p>
-                        <input type="number" id="dayBet" placeholder="0" class="bg-transparent text-xl font-black text-white w-full text-center outline-none">
-                    </div>
-                    <div onclick="setActiveInput('monthBet')" id="boxMonthBet" class="data-card p-3 rounded-xl text-center border-indigo-900/40">
-                        <p class="input-label text-indigo-400">30日總下注</p>
-                        <input type="number" id="monthBet" placeholder="0" class="bg-transparent text-xl font-black text-white w-full text-center outline-none">
+                        <input type="number" id="dayBet" placeholder="0" class="bg-transparent text-lg font-black text-white w-full text-center outline-none">
                     </div>
                     <div onclick="setActiveInput('dayRtp')" id="boxDayRtp" class="data-card p-2.5 rounded-xl text-center">
-                        <p class="input-label">今日得分率 %</p>
+                        <p class="input-label text-blue-400">今日得分率 %</p>
                         <input type="number" id="dayRtp" placeholder="0" class="bg-transparent text-lg font-black text-white w-full text-center outline-none">
                     </div>
-                    <div onclick="setActiveInput('targetRtp')" id="boxTargetRtp" class="data-card p-2.5 rounded-xl text-center">
-                        <p class="input-label">設定 RTP %</p>
-                        <input type="number" id="targetRtp" value="96.8" class="bg-transparent text-lg font-black text-white w-full text-center outline-none">
+                </div>
+
+                <div class="grid grid-cols-2 gap-2 border-t border-white/5 pt-2">
+                    <div onclick="setActiveInput('monthBet')" id="boxMonthBet" class="data-card p-2.5 rounded-xl text-center border-indigo-900/30">
+                        <p class="input-label text-indigo-400">30日總下注</p>
+                        <input type="number" id="monthBet" placeholder="0" class="bg-transparent text-lg font-black text-white w-full text-center outline-none">
+                    </div>
+                    <div onclick="setActiveInput('monthRtp')" id="boxMonthRtp" class="data-card p-2.5 rounded-xl text-center border-indigo-900/30">
+                        <p class="input-label text-indigo-400">30日得分率 %</p>
+                        <input type="number" id="monthRtp" placeholder="0" class="bg-transparent text-lg font-black text-white w-full text-center outline-none">
                     </div>
                 </div>
 
@@ -63,17 +66,17 @@
                         <p class="input-label text-orange-400">當前未開</p>
                         <input type="number" id="curGap" placeholder="0" class="bg-transparent text-lg font-black text-orange-400 w-full text-center outline-none">
                     </div>
-                    <div onclick="setActiveInput('pre1')" id="boxPre1" class="data-card p-2 rounded-xl text-center opacity-70">
+                    <div onclick="setActiveInput('pre1')" id="boxPre1" class="data-card p-2 rounded-xl text-center opacity-60">
                         <p class="input-label">前1未開</p>
-                        <input type="number" id="pre1" placeholder="0" class="bg-transparent text-lg font-bold text-gray-300 w-full text-center outline-none">
+                        <input type="number" id="pre1" placeholder="0" class="bg-transparent text-base font-bold text-gray-300 w-full text-center outline-none">
                     </div>
-                    <div onclick="setActiveInput('pre2')" id="boxPre2" class="data-card p-2 rounded-xl text-center opacity-70">
-                        <p class="input-label">前2未開</p>
-                        <input type="number" id="pre2" placeholder="0" class="bg-transparent text-lg font-bold text-gray-300 w-full text-center outline-none">
+                    <div onclick="setActiveInput('targetRtp')" id="boxTargetRtp" class="data-card p-2 rounded-xl text-center opacity-60">
+                        <p class="input-label">設定 RTP%</p>
+                        <input type="number" id="targetRtp" value="96.8" class="bg-transparent text-base font-bold text-gray-300 w-full text-center outline-none">
                     </div>
                 </div>
                 
-                <button onclick="runSkyCityAnalysis()" class="w-full py-3.5 bg-blue-700 rounded-2xl font-black text-xs uppercase tracking-[0.2em] shadow-xl active:scale-95 transition">執行大數據綜合分析</button>
+                <button onclick="runSkyCityAnalysis()" class="w-full py-4 bg-indigo-700 rounded-2xl font-black text-xs uppercase tracking-[0.3em] shadow-xl active:scale-95 transition">執行大週期綜合判斷</button>
             </div>
 
             <div id="pageLive" class="p-3 space-y-2 hidden-page">
@@ -84,34 +87,34 @@
                     <div onclick="setActiveInput('spinT')" id="boxSpinT" class="data-card p-1.5 rounded-lg text-center"><p class="text-blue-400">測速轉</p><input type="number" id="spinT" value="50" class="bg-transparent text-blue-400 w-full text-center outline-none"></div>
                 </div>
                 <div class="grid grid-cols-2 gap-2 mt-1">
-                    <div onclick="setActiveInput('sBal')" id="boxSBal" class="data-card p-3.5 rounded-2xl border border-blue-600 text-center"><p class="input-label">測速起始</p><input type="number" id="sBal" class="w-full bg-transparent text-2xl font-black text-center outline-none" placeholder="0"></div>
-                    <div onclick="setActiveInput('eBal')" id="boxEBal" class="data-card p-3.5 rounded-2xl border border-transparent text-center"><p class="input-label">測速結算</p><input type="number" id="eBal" class="w-full bg-transparent text-2xl font-black text-center outline-none" placeholder="0"></div>
+                    <div onclick="setActiveInput('sBal')" id="boxSBal" class="data-card p-4 rounded-2xl border border-blue-600 text-center"><p class="input-label">起始金額</p><input type="number" id="sBal" class="w-full bg-transparent text-2xl font-black text-center outline-none" placeholder="0"></div>
+                    <div onclick="setActiveInput('eBal')" id="boxEBal" class="data-card p-4 rounded-2xl border border-transparent text-center"><p class="input-label">測速結束</p><input type="number" id="eBal" class="w-full bg-transparent text-2xl font-black text-center outline-none" placeholder="0"></div>
                 </div>
-                <button onclick="runLiveStrategy()" class="w-full py-3.5 bg-green-700 rounded-2xl font-black text-xs uppercase tracking-widest active:scale-95 transition">計算下注策略</button>
+                <button onclick="runLiveStrategy()" class="w-full py-4 bg-blue-600 rounded-2xl font-black text-xs tracking-widest active:scale-95 transition">計算下注建議</button>
             </div>
 
-            <div class="p-3 pt-0 grid grid-cols-6 gap-1 text-sm">
-                <button onclick="pressKey('1')" class="py-3 bg-white/5 rounded-xl font-bold">1</button>
-                <button onclick="pressKey('2')" class="py-3 bg-white/5 rounded-xl font-bold">2</button>
-                <button onclick="pressKey('3')" class="py-3 bg-white/5 rounded-xl font-bold">3</button>
-                <button onclick="pressKey('4')" class="py-3 bg-white/5 rounded-xl font-bold">4</button>
-                <button onclick="pressKey('5')" class="py-3 bg-white/5 rounded-xl font-bold">5</button>
-                <button onclick="pressKey('C')" class="py-3 bg-red-900/30 text-red-500 rounded-xl font-bold">C</button>
-                <button onclick="pressKey('6')" class="py-3 bg-white/5 rounded-xl font-bold">6</button>
-                <button onclick="pressKey('7')" class="py-3 bg-white/5 rounded-xl font-bold">7</button>
-                <button onclick="pressKey('8')" class="py-3 bg-white/5 rounded-xl font-bold">8</button>
-                <button onclick="pressKey('9')" class="py-3 bg-white/5 rounded-xl font-bold">9</button>
-                <button onclick="pressKey('0')" class="py-3 bg-white/5 rounded-xl font-bold">0</button>
-                <button onclick="resetAll()" class="py-3 bg-gray-800 rounded-xl font-bold text-[8px] text-gray-400">RESET</button>
+            <div class="p-3 pt-0 grid grid-cols-6 gap-1">
+                <button onclick="pressKey('1')" class="py-3.5 bg-white/5 rounded-xl font-bold">1</button>
+                <button onclick="pressKey('2')" class="py-3.5 bg-white/5 rounded-xl font-bold">2</button>
+                <button onclick="pressKey('3')" class="py-3.5 bg-white/5 rounded-xl font-bold">3</button>
+                <button onclick="pressKey('4')" class="py-3.5 bg-white/5 rounded-xl font-bold">4</button>
+                <button onclick="pressKey('5')" class="py-3.5 bg-white/5 rounded-xl font-bold">5</button>
+                <button onclick="pressKey('C')" class="py-3.5 bg-red-900/30 text-red-500 rounded-xl font-bold text-xs">CLR</button>
+                <button onclick="pressKey('6')" class="py-3.5 bg-white/5 rounded-xl font-bold">6</button>
+                <button onclick="pressKey('7')" class="py-3.5 bg-white/5 rounded-xl font-bold">7</button>
+                <button onclick="pressKey('8')" class="py-3.5 bg-white/5 rounded-xl font-bold">8</button>
+                <button onclick="pressKey('9')" class="py-3.5 bg-white/5 rounded-xl font-bold">9</button>
+                <button onclick="pressKey('0')" class="py-3.5 bg-white/5 rounded-xl font-bold">0</button>
+                <button onclick="resetAll()" class="py-3.5 bg-gray-800 rounded-xl font-bold text-[8px] text-gray-400">RESET</button>
             </div>
         </div>
 
         <div id="logSection" class="flex-grow flex flex-col min-h-0 bg-[#111] rounded-[1.5rem] border border-white/5 mb-4 overflow-hidden">
+            <div id="roomStatsBar" class="p-2 border-b border-white/5 text-center"><span class="text-[9px] font-black text-gray-500 uppercase tracking-widest italic">Diagnostic Reports</span></div>
             <div id="battleStatsBar" class="p-4 border-b border-white/10 flex justify-between items-center hidden-page">
-                <div><p class="text-[8px] text-gray-500 font-bold">已累計轉數</p><span id="totalSpinsDisplay" class="text-xl font-black text-blue-400 leading-none">0</span></div>
-                <div class="text-right"><p id="moodTag" class="text-[8px] text-blue-500 font-bold mb-1 tracking-tighter">DATA ANALYZING</p><span id="totalRtpDisplay" class="text-xl font-black text-green-400 leading-none">0.0%</span></div>
+                <div><p class="text-[8px] text-gray-500 font-bold uppercase">Spins</p><span id="totalSpinsDisplay" class="text-xl font-black text-blue-400 leading-none">0</span></div>
+                <div class="text-right"><p id="moodTag" class="text-[8px] text-blue-500 font-bold mb-1 tracking-tighter">STANDBY</p><span id="totalRtpDisplay" class="text-xl font-black text-green-400 leading-none">0.0%</span></div>
             </div>
-            <div id="roomStatsBar" class="p-2 border-b border-white/5 text-center"><span class="text-[10px] font-black text-gray-500 uppercase tracking-widest italic">Room & Strategy Logs</span></div>
             <div id="historyList" class="flex-grow overflow-y-auto p-4 space-y-2"></div>
         </div>
     </div>
@@ -148,30 +151,33 @@
             const dbet = parseFloat(document.getElementById('dayBet').value) || 0;
             const mbet = parseFloat(document.getElementById('monthBet').value) || 1;
             const drtp = parseFloat(document.getElementById('dayRtp').value) || 0;
+            const mrtp = parseFloat(document.getElementById('monthRtp').value) || 0;
             const trtp = parseFloat(document.getElementById('targetRtp').value) || 96.8;
             const curGap = parseInt(document.getElementById('curGap').value) || 0;
-            const preAvg = (parseInt(document.getElementById('pre1').value || 0) + parseInt(document.getElementById('pre2').value || 0)) / 2 || 1;
+            const pre1 = parseInt(document.getElementById('pre1').value) || 1;
 
-            const houseMoney = dbet * (1 - (drtp/100)); // 機台今日盈虧
-            const balanceRatio = (dbet / (mbet / 30)) * 100; // 平衡度
-            const gapTrend = curGap / preAvg;
+            const dayHouseMoney = dbet * (1 - (drtp/100)); // 今日機台淨賺
+            const monthBalance = mrtp - trtp; // 30日得分率與設定值的差距
+            const gapTrend = curGap / pre1;
 
             let advice = "", col = "#3b82f6";
 
-            if (balanceRatio < 30) {
-                advice = "數據樣本不足，建議先觀察"; col = "#94a3b8";
-            } else if (houseMoney > 0 && gapTrend < 1) {
-                advice = "黃金期：機台盈餘多且頻繁出分"; col = "#fbbf24";
-            } else if (houseMoney > 0 && gapTrend > 2) {
-                advice = "冷機期：機器大咬且進入長洗手"; col = "#ef4444";
-            } else if (houseMoney < 0) {
-                advice = "已吐分：機器目前虧損，慎防收尾"; col = "#10b981";
+            // --- 深度決策邏輯 ---
+            if (mrtp > 0 && monthBalance < -5 && drtp < trtp) {
+                // 30日得分率比設定低 5% 以上，且今天也在咬錢
+                advice = "超級紅池預警：大週期嚴重虧欠，隨時噴發"; col = "#ef4444";
+            } else if (dayHouseMoney > 0 && gapTrend < 1) {
+                advice = "穩定吃錢中：今日盈餘飽滿，節奏緊湊可進"; col = "#fbbf24";
+            } else if (monthBalance > 3) {
+                advice = "週期過熱：本月吐分已超標，機器可能強抽水"; col = "#94a3b8";
+            } else if (drtp > 120) {
+                advice = "今日已吐分：機台處於虧損狀態，不建議埋伏"; col = "#10b981";
             } else {
-                advice = "狀態平穩，適合正常測速"; col = "#3b82f6";
+                advice = "狀態平穩：適合小額測速觀察"; col = "#3b82f6";
             }
 
             updateStatus("深度分析", advice, col);
-            addHistory("房況分析", `盈虧: $${Math.floor(houseMoney)} | 平衡: ${balanceRatio.toFixed(1)}%`, advice, col);
+            addHistory("週期診斷", `月偏離: ${monthBalance.toFixed(1)}% | 今日淨賺: $${Math.floor(dayHouseMoney)}`, advice, col);
         }
 
         function runLiveStrategy() {
@@ -188,13 +194,13 @@
 
             totalSpins += t; totalBet += roundBet; totalReturn += roundRet;
             
-            let m = 1.0, res = "平打策略", col = "#3b82f6";
+            let m = 1.0, res = "平打測速", col = "#3b82f6";
             if (mode === 'high') {
-                if (rtp >= 130) { m = 4.0; res = "追擊 4.0X"; col = "#f87171"; }
-                else if (rtp < 75) { m = 0.1; res = "避險 0.1X"; col = "#991b1b"; }
+                if (rtp >= 130) { m = 4.0; res = "強烈追擊 4.0X"; col = "#f87171"; }
+                else if (rtp < 70) { m = 0.1; res = "極限防守 0.1X"; col = "#991b1b"; }
             } else {
-                if (rtp >= 150) { m = 2.5; res = "加碼 2.5X"; col = "#a855f7"; }
-                else if (rtp < 85) { m = 0.5; res = "縮手 0.5X"; col = "#ef4444"; }
+                if (rtp >= 150) { m = 2.5; res = "加碼進攻 2.5X"; col = "#a855f7"; }
+                else if (rtp < 80) { m = 0.5; res = "減注觀察 0.5X"; col = "#ef4444"; }
             }
 
             updateStatus("注碼建議", `$ ${(bet * m).toFixed(1)}`, col);
@@ -210,6 +216,7 @@
             document.getElementById('totalSpinsDisplay').innerText = totalSpins;
             const gRtp = (totalReturn / totalBet) * 100;
             document.getElementById('totalRtpDisplay').innerText = gRtp.toFixed(1) + "%";
+            document.getElementById('moodTag').innerText = gRtp > 100 ? "PROFIT ZONE" : "ANALYZING";
         }
 
         function updateStatus(main, sub, col) {
@@ -226,7 +233,7 @@
             list.prepend(row);
         }
 
-        function resetAll() { if(confirm("確定重置所有數據？")) location.reload(); }
+        function resetAll() { if(confirm("確定清除數據重新開始？")) location.reload(); }
     </script>
 </body>
 </html>
