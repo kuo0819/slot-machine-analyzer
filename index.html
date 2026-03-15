@@ -3,19 +3,21 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>鋼鐵執行者 - 波動診斷版</title>
+    <title>鋼鐵執行者</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         * { touch-action: manipulation; -webkit-tap-highlight-color: transparent; -webkit-user-select: none; }
-        body { background-color: #050505; color: white; overflow: hidden; height: 100vh; display: flex; flex-direction: column; }
+        body { background-color: #050505; color: white; overflow: hidden; height: 100vh; display: flex; flex-direction: column; transition: background-color 0.5s; }
         .data-card { background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.1); }
         .active-box { border-color: #3b82f6 !important; background: rgba(59, 130, 246, 0.15); box-shadow: 0 0 10px rgba(59, 130, 246, 0.2); }
         input { pointer-events: none; }
         .tab-active { color: #3b82f6; border-bottom: 2px solid #3b82f6; font-weight: 900; }
         .hidden-page { display: none; }
-        /* 波動燈動畫 */
-        .volt-flash { animation: pulse 2s infinite; }
-        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.4; } 100% { opacity: 1; } }
+        .volt-flash { animation: pulse 1s infinite; }
+        @keyframes pulse { 0% { opacity: 1; box-shadow: 0 0 15px currentColor; } 50% { opacity: 0.3; } 100% { opacity: 1; box-shadow: 0 0 15px currentColor; } }
+        /* 警示模式 */
+        .tilt-mode { background-color: #450a0a !important; }
+        .win-mode { background-color: #064e3b !important; }
     </style>
 </head>
 <body class="p-3 font-sans">
@@ -23,8 +25,8 @@
     <div class="max-w-md w-full h-full flex flex-col mx-auto space-y-3">
         
         <div class="flex justify-around bg-[#111] rounded-xl border border-white/5 flex-shrink-0">
-            <button onclick="switchPage('room')" id="tabRoom" class="flex-1 py-3 text-[11px] text-gray-500 tab-active">房間數據診斷</button>
-            <button onclick="switchPage('live')" id="tabLive" class="flex-1 py-3 text-[11px] text-gray-500">測速策略執行</button>
+            <button onclick="switchPage('room')" id="tabRoom" class="flex-1 py-3 text-[11px] text-gray-500 tab-active">數據診斷</button>
+            <button onclick="switchPage('live')" id="tabLive" class="flex-1 py-3 text-[11px] text-gray-500">測速執行</button>
         </div>
 
         <div class="bg-[#111] rounded-[2rem] border border-gray-800 overflow-hidden flex-shrink-0">
@@ -33,60 +35,32 @@
                     <div id="voltLight" class="w-3 h-3 rounded-full bg-gray-600 mb-1"></div>
                     <span id="voltText" class="text-[8px] font-bold text-gray-500 uppercase">VOLT</span>
                 </div>
-
-                <div id="topTag" class="text-[9px] font-black tracking-widest text-gray-500">SYSTEM ANALYZING</div>
-                <h1 id="mainAction" class="text-xl font-black my-1 text-white">請輸入數據</h1>
-                <div id="subText" class="text-[10px] text-blue-400 font-bold">Waiting for input...</div>
+                <div id="topTag" class="text-[9px] font-black tracking-widest text-gray-500 uppercase">System Active</div>
+                <h1 id="mainAction" class="text-xl font-black my-1 text-white">等待指令</h1>
+                <div id="subText" class="text-[10px] text-blue-400 font-bold uppercase">Safe Mode</div>
             </div>
 
             <div id="pageRoom" class="p-4 space-y-3">
                 <div class="grid grid-cols-2 gap-2">
-                    <div onclick="setActiveInput('dayRtp')" id="boxDayRtp" class="data-card p-2 rounded-xl text-center cursor-pointer">
-                        <p class="text-[8px] text-gray-500 font-bold">當日 RTP (%)</p>
-                        <input type="number" id="dayRtp" placeholder="0" class="bg-transparent text-sm font-bold text-white w-full text-center outline-none">
-                    </div>
-                    <div onclick="setActiveInput('dayBet')" id="boxDayBet" class="data-card p-2 rounded-xl text-center cursor-pointer">
-                        <p class="text-[8px] text-gray-500 font-bold">當日投注 (萬)</p>
-                        <input type="number" id="dayBet" placeholder="0" class="bg-transparent text-sm font-bold text-white w-full text-center outline-none">
-                    </div>
-                    <div onclick="setActiveInput('monthRtp')" id="boxMonthRtp" class="data-card p-2 rounded-xl text-center cursor-pointer">
-                        <p class="text-[8px] text-gray-400 font-bold">30日 RTP (%)</p>
-                        <input type="number" id="monthRtp" placeholder="0" class="bg-transparent text-sm font-bold text-gray-300 w-full text-center outline-none">
-                    </div>
-                    <div onclick="setActiveInput('monthBet')" id="boxMonthBet" class="data-card p-2 rounded-xl text-center cursor-pointer">
-                        <p class="text-[8px] text-gray-400 font-bold">30日投注 (萬)</p>
-                        <input type="number" id="monthBet" placeholder="0" class="bg-transparent text-sm font-bold text-gray-300 w-full text-center outline-none">
-                    </div>
+                    <div onclick="setActiveInput('dayRtp')" id="boxDayRtp" class="data-card p-2 rounded-xl text-center"><p class="text-[8px] text-gray-500 font-bold">當日 RTP</p><input type="number" id="dayRtp" placeholder="0" class="bg-transparent text-sm font-bold text-white w-full text-center outline-none"></div>
+                    <div onclick="setActiveInput('dayBet')" id="boxDayBet" class="data-card p-2 rounded-xl text-center"><p class="text-[8px] text-gray-500 font-bold">當日總投</p><input type="number" id="dayBet" placeholder="0" class="bg-transparent text-sm font-bold text-white w-full text-center outline-none"></div>
+                    <div onclick="setActiveInput('monthRtp')" id="boxMonthRtp" class="data-card p-2 rounded-xl text-center"><p class="text-[8px] text-gray-400 font-bold">30日 RTP</p><input type="number" id="monthRtp" placeholder="0" class="bg-transparent text-sm font-bold text-gray-400 w-full text-center outline-none"></div>
+                    <div onclick="setActiveInput('monthBet')" id="boxMonthBet" class="data-card p-2 rounded-xl text-center"><p class="text-[8px] text-gray-400 font-bold">30日總投</p><input type="number" id="monthBet" placeholder="0" class="bg-transparent text-sm font-bold text-gray-400 w-full text-center outline-none"></div>
                 </div>
-                <button onclick="runDeepAnalysis()" class="w-full py-3 bg-indigo-600 rounded-xl font-black text-white shadow-lg active:scale-95 transition-transform">進行波動深度分析</button>
+                <button onclick="runDeepAnalysis()" class="w-full py-3 bg-indigo-600 rounded-xl font-black text-white">啟動波動深度診斷</button>
             </div>
 
             <div id="pageLive" class="p-4 space-y-4 hidden-page">
-                <div class="grid grid-cols-3 gap-2 mb-1">
-                    <div onclick="setActiveInput('initCap')" id="boxInitCap" class="data-card p-2 rounded-lg text-center cursor-pointer">
-                        <p class="text-[8px] text-gray-500 font-bold">本金</p>
-                        <input type="number" id="initCap" value="1000" class="bg-transparent text-[10px] font-bold text-white w-full text-center outline-none">
-                    </div>
-                    <div onclick="setActiveInput('baseBet')" id="boxBaseBet" class="data-card p-2 rounded-lg text-center cursor-pointer">
-                        <p class="text-[8px] text-gray-500 font-bold">基準注</p>
-                        <input type="number" id="baseBet" value="10" class="bg-transparent text-[10px] font-bold text-white w-full text-center outline-none">
-                    </div>
-                    <div onclick="setActiveInput('spinT')" id="boxSpinT" class="data-card p-2 rounded-lg text-center cursor-pointer">
-                        <p class="text-[8px] text-blue-400 font-bold">測速轉數</p>
-                        <input type="number" id="spinT" value="50" class="bg-transparent text-[10px] font-bold text-blue-400 w-full text-center outline-none">
-                    </div>
+                <div class="grid grid-cols-3 gap-2">
+                    <div onclick="setActiveInput('initCap')" id="boxInitCap" class="data-card p-2 rounded-lg text-center"><p class="text-[8px] text-gray-500 font-bold">本金</p><input type="number" id="initCap" value="1000" class="bg-transparent text-[10px] font-bold text-white w-full text-center outline-none"></div>
+                    <div onclick="setActiveInput('baseBet')" id="boxBaseBet" class="data-card p-2 rounded-lg text-center"><p class="text-[8px] text-gray-500 font-bold">基準注</p><input type="number" id="baseBet" value="10" class="bg-transparent text-[10px] font-bold text-white w-full text-center outline-none"></div>
+                    <div onclick="setActiveInput('spinT')" id="boxSpinT" class="data-card p-2 rounded-lg text-center"><p class="text-[8px] text-blue-400 font-bold">轉數</p><input type="number" id="spinT" value="50" class="bg-transparent text-[10px] font-bold text-blue-400 w-full text-center outline-none"></div>
                 </div>
                 <div class="grid grid-cols-2 gap-3">
-                    <div onclick="setActiveInput('sBal')" id="boxSBal" class="data-card p-3 rounded-2xl border-2 border-blue-600 text-center cursor-pointer">
-                        <p class="text-[9px] text-gray-500 font-bold">測速前</p>
-                        <input type="number" id="sBal" class="w-full bg-transparent text-xl font-black text-center outline-none" placeholder="0">
-                    </div>
-                    <div onclick="setActiveInput('eBal')" id="boxEBal" class="data-card p-3 rounded-2xl border-2 border-transparent text-center cursor-pointer">
-                        <p class="text-[9px] text-gray-500 font-bold">測速後</p>
-                        <input type="number" id="eBal" class="w-full bg-transparent text-xl font-black text-center outline-none" placeholder="0">
-                    </div>
+                    <div onclick="setActiveInput('sBal')" id="boxSBal" class="data-card p-3 rounded-2xl border-2 border-blue-600 text-center"><p class="text-[9px] text-gray-500 font-bold">前餘額</p><input type="number" id="sBal" class="w-full bg-transparent text-xl font-black text-center outline-none"></div>
+                    <div onclick="setActiveInput('eBal')" id="boxEBal" class="data-card p-3 rounded-2xl border-2 border-transparent text-center"><p class="text-[9px] text-gray-500 font-bold">後餘額</p><input type="number" id="eBal" class="w-full bg-transparent text-xl font-black text-center outline-none"></div>
                 </div>
-                <button onclick="runLiveStrategy()" class="w-full py-3 bg-blue-600 rounded-xl font-black text-white shadow-lg">執行測速策略</button>
+                <button onclick="runLiveStrategy()" class="w-full py-3 bg-blue-600 rounded-xl font-black text-white">計算下一步 (嚴控風險)</button>
             </div>
 
             <div class="p-4 pt-0 grid grid-cols-3 gap-1.5">
@@ -101,7 +75,7 @@
                 <button onclick="pressKey('9')" class="py-3 bg-white/5 rounded-xl font-bold">9</button>
                 <button onclick="pressKey('C')" class="py-3 bg-red-900/10 text-red-500 rounded-xl font-bold">C</button>
                 <button onclick="pressKey('0')" class="py-3 bg-white/5 rounded-xl font-bold">0</button>
-                <button onclick="resetAll()" class="py-3 bg-gray-800 rounded-xl font-bold text-[10px]">重置</button>
+                <button onclick="resetAll()" class="py-3 bg-gray-800 rounded-xl font-bold text-[10px]">重置數據</button>
             </div>
         </div>
 
@@ -111,6 +85,8 @@
     <script>
         let currentInputId = 'dayRtp';
         let cycle = 0;
+        let lastLiveRtp = null;
+        let lossStreak = 0;
 
         function switchPage(page) {
             document.getElementById('pageRoom').classList.toggle('hidden-page', page !== 'room');
@@ -129,79 +105,77 @@
 
         function pressKey(key) {
             const input = document.getElementById(currentInputId);
-            if (!input) return;
             if (key === 'C') input.value = ''; else input.value += key;
         }
 
-        function runDeepAnalysis() {
-            const dRtp = parseFloat(document.getElementById('dayRtp').value) || 0;
-            const dBet = parseFloat(document.getElementById('dayBet').value) || 0;
-            const mRtp = parseFloat(document.getElementById('monthRtp').value) || 0;
-            const mBet = parseFloat(document.getElementById('monthBet').value) || 0;
-
-            if (!dRtp || !mRtp) return;
-
-            const rtpDiff = dRtp - mRtp;
-            const volLevel = Math.abs(rtpDiff); // 波動等級基準
-
-            let res = ""; let adv = ""; let col = "#9ca3af";
-            let voltCol = "#4b5563"; let voltStatus = "穩定";
-
-            // 波動率燈光判定
-            if (volLevel > 15 || (dBet > (mBet/15))) {
-                voltCol = "#ef4444"; voltStatus = "狂暴";
-                document.getElementById('voltLight').classList.add('volt-flash');
-            } else if (volLevel > 7) {
-                voltCol = "#f59e0b"; voltStatus = "升溫";
-                document.getElementById('voltLight').classList.remove('volt-flash');
-            } else {
-                voltCol = "#22c55e"; voltStatus = "穩定";
-                document.getElementById('voltLight').classList.remove('volt-flash');
-            }
-
-            // 診斷邏輯
-            if (rtpDiff > 5 && mRtp < 97) {
-                res = "黃金起跳房 🚀";
-                adv = "波動率升溫且蓄水突破，強烈進場訊號";
-                col = "#a855f7";
-            } else if (dRtp < 88 && dBet > (mBet/20)) {
-                res = "強吸分陷阱 ⛔";
-                adv = "高波動吃分狀態，投注量大但無回饋";
-                col = "#ef4444";
-            } else {
-                res = "數據平穩房 ⚖️";
-                adv = "波動率低，適合固定注碼磨免遊";
-                col = "#22c55e";
-            }
-
-            // 更新燈光
+        function updateVoltDisplay(diff) {
             const vLight = document.getElementById('voltLight');
             const vText = document.getElementById('voltText');
-            vLight.style.backgroundColor = voltCol;
-            vLight.style.boxShadow = `0 0 10px ${voltCol}`;
-            vText.innerText = voltStatus;
-            vText.style.color = voltCol;
+            let color = "#22c55e"; let status = "穩定"; let flash = false;
+            if (Math.abs(diff) > 40) { color = "#ef4444"; status = "狂暴"; flash = true; }
+            else if (Math.abs(diff) > 15) { color = "#f59e0b"; status = "升溫"; flash = false; }
+            vLight.style.backgroundColor = color;
+            vLight.style.boxShadow = `0 0 10px ${color}`;
+            vLight.classList.toggle('volt-flash', flash);
+            vText.innerText = status; vText.style.color = color;
+        }
 
-            updateStatus("深度波動診斷", res, adv, col);
-            addHistory("深度診斷", `波動:${voltStatus}`, res, col);
+        function runDeepAnalysis() {
+            const dR = parseFloat(document.getElementById('dayRtp').value) || 0;
+            const mR = parseFloat(document.getElementById('monthRtp').value) || 0;
+            if (!dR || !mR) return;
+            const diff = dR - mR;
+            updateVoltDisplay(diff);
+            let res = "平穩房間"; let adv = "保守磨進策略"; let col = "#22c55e";
+            if (diff > 5 && mR < 97) { res = "黃金起跳房 🚀"; adv = "符合起漲邏輯，可進場"; col = "#a855f7"; }
+            else if (dR < 88) { res = "吸分陷阱 ⛔"; adv = "禁止進場，房間處於強抽水"; col = "#ef4444"; }
+            updateStatus("深度分析", res, adv, col);
+            addHistory("診斷", `差值:${diff.toFixed(1)}%`, res, col);
         }
 
         function runLiveStrategy() {
-            const bet = parseFloat(document.getElementById('baseBet').value) || 0;
-            const s = parseFloat(document.getElementById('sBal').value) || 0;
-            const e = parseFloat(document.getElementById('eBal').value) || 0;
-            const t = parseFloat(document.getElementById('spinT').value) || 50;
+            const init = parseFloat(document.getElementById('initCap').value);
+            const bet = parseFloat(document.getElementById('baseBet').value);
+            const s = parseFloat(document.getElementById('sBal').value);
+            const e = parseFloat(document.getElementById('eBal').value);
+            const t = parseFloat(document.getElementById('spinT').value);
             if (!s || !e) return;
 
+            const totalPL = e - init;
             const rtp = ((e - s + (bet * t)) / (bet * t)) * 100;
+            
+            // 防上頭邏輯 1: 止損鎖定
+            if (totalPL <= -(init * 0.5)) {
+                document.body.classList.add('tilt-mode');
+                updateStatus("觸發止損保護", "請立即結束離場", "虧損超過 50%，系統鎖定", "#fff");
+                return;
+            }
+
+            // 防上頭邏輯 2: 止盈提醒
+            if (totalPL >= init * 0.5) {
+                document.body.classList.add('win-mode');
+                updateStatus("達成獲利目標", "建議領現離場", "獲利已達 50%", "#fff");
+            }
+
+            if (lastLiveRtp !== null) updateVoltDisplay(rtp - lastLiveRtp);
+
             let m = 1.0; let res = "平打觀察"; let col = "#3b82f6";
+            if (rtp >= 160) { m = 3.0; res = "倍數跳躍 3X"; col = "#a855f7"; lossStreak = 0; }
+            else if (rtp >= 120) { m = 2.0; res = "強力追擊 2X"; col = "#ec4899"; lossStreak = 0; }
+            else if (rtp < 80) { 
+                m = 0.2; res = "強制避險 0.2X"; col = "#ef4444"; 
+                lossStreak++; 
+            }
 
-            if (rtp >= 160) { m = 3.0; res = "倍數跳躍 3X"; col = "#a855f7"; }
-            else if (rtp >= 120) { m = 2.0; res = "強力追擊 2X"; col = "#ec4899"; }
-            else if (rtp < 80) { m = 0.2; res = "避險模式"; col = "#ef4444"; }
+            // 防上頭邏輯 3: 連輸強制冷靜
+            if (lossStreak >= 3) {
+                updateStatus("連輸警報", "強制休息 5 分鐘", "數據顯示機台極度吸分中", "#f87171");
+            } else {
+                updateStatus("測速執行", `$ ${(bet * m).toFixed(1)}`, res, col);
+            }
 
-            updateStatus("測速執行結果", `$ ${(bet * m).toFixed(1)}`, res, col);
             addHistory(`測速 #${++cycle}`, `${rtp.toFixed(1)}%`, res, col);
+            lastLiveRtp = rtp;
             document.getElementById('sBal').value = e;
             document.getElementById('eBal').value = '';
             setActiveInput('eBal');
@@ -209,10 +183,10 @@
 
         function updateStatus(tag, main, sub, col) {
             document.getElementById('topTag').innerText = tag;
-            document.getElementById('mainAction').innerText = main;
-            document.getElementById('mainAction').style.color = col;
-            document.getElementById('subText').innerText = sub;
-            document.getElementById('subText').style.color = col;
+            const m = document.getElementById('mainAction');
+            m.innerText = main; m.style.color = col;
+            const s = document.getElementById('subText');
+            s.innerText = sub; s.style.color = col;
         }
 
         function addHistory(type, data, res, col) {
@@ -224,7 +198,7 @@
             list.prepend(row);
         }
 
-        function resetAll() { if(confirm("確定重置數據？")) location.reload(); }
+        function resetAll() { if(confirm("確定重置？所有防護將重置")) { document.body.className = ''; location.reload(); } }
     </script>
 </body>
 </html>
